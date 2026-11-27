@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#02070c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600&display=swap">
+<title>JARVIS</title>
+<style>
+:root{--bg:#030408;--card:rgba(6,12,28,.8);--c2:rgba(47,155,255,.1);--line:rgba(47,155,255,.36);--tx:#e6f1ff;--mut:#7f9cc4;--acc:#2f9bff;--hot:#ff2a3a;--onacc:#00101f;--hf:Orbitron,"Segoe UI",system-ui,sans-serif;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-acc=red]{--acc:#ff2a3a;--hot:#2f9bff;--line:rgba(255,42,58,.38);--c2:rgba(255,42,58,.1);--mut:#c48a90;--tx:#ffe9eb;--onacc:#210003}
+:root[data-theme=light]{--bg:#0d3b8f;--card:rgba(255,255,255,.1);--c2:rgba(255,255,255,.12);--line:rgba(255,255,255,.5);--tx:#fff;--mut:#c3d8ff;--acc:#fff;--hot:#ff4b57;--onacc:#0d3b8f}
+:root[data-theme=light][data-acc=red]{--acc:#ff9aa1;--hot:#fff;--line:rgba(255,190,195,.6)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;height:100%;color:var(--tx);font-family:Rajdhani,"Segoe UI",system-ui,sans-serif;font-size:16px;user-select:none;background:radial-gradient(900px 600px at 50% 42%,color-mix(in srgb,var(--acc) 16%,transparent),transparent 65%),linear-gradient(var(--c2) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,var(--c2) 1px,transparent 1px) 0 0/44px 44px,var(--bg);transition:background .5s}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);z-index:0}
+.app{display:flex;flex-direction:column;height:100%;position:relative;z-index:1}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px}
+.logo{font-family:var(--hf);font-weight:700;letter-spacing:.28em;color:var(--hot);font-size:18px;text-shadow:0 0 12px var(--hot)}
+.sp{flex:1}
+.body{flex:1;display:flex;min-height:0}
+.rail{display:flex;flex-direction:column;gap:8px;padding:8px 10px;justify-content:center}
+.tab{width:78px;background:var(--card);border:1px solid var(--line);color:var(--mut);padding:10px 2px;font-family:var(--hf);font-size:9px;letter-spacing:.12em;cursor:pointer;transition:all .25s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.tab i{display:block;font-style:normal;font-size:20px;margin-bottom:3px}
+.tab.on{color:var(--acc);border-color:var(--acc);box-shadow:inset 0 0 16px color-mix(in srgb,var(--acc) 30%,transparent);text-shadow:0 0 8px var(--acc)}
+main{flex:1;position:relative;overflow:hidden}
+.pg{position:absolute;inset:0;overflow:auto;padding:6px 16px 14px;opacity:0;transform:scale(.985);pointer-events:none;transition:opacity .4s,transform .4s}
+.pg.on{opacity:1;transform:none;pointer-events:auto}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);padding:14px;position:relative;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 0 26px color-mix(in srgb,var(--acc) 9%,transparent);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.card h3{margin:0 0 6px;font-family:var(--hf);font-size:13px;letter-spacing:.2em;color:var(--acc);text-transform:uppercase;font-weight:500}
+.mut{color:var(--mut);font-size:13px}
+.row{display:flex;align-items:center;gap:10px}.sb{justify-content:space-between}.wrap{flex-wrap:wrap}
+.clk{font-family:var(--hf);font-size:46px;font-weight:700;text-shadow:0 0 14px var(--acc);line-height:1}
+.hud{display:grid;grid-template-columns:minmax(230px,1fr) minmax(320px,1.4fr) minmax(230px,1fr);gap:16px;align-items:center;min-height:100%}
+.core{display:flex;flex-direction:column;gap:12px;align-items:center}
+.reactor{width:100%;max-width:520px;position:relative}
+.reactor svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--acc) 70%,transparent))}
+circle.a{fill:none;stroke-linecap:round;transform-box:fill-box;transform-origin:center;transform:rotate(135deg)}
+circle.d{fill:none;stroke:var(--acc)}
+.spin{transform-box:fill-box;transform-origin:center;animation:sp 40s linear infinite}.spin2{transform-box:fill-box;transform-origin:center;animation:sp 26s linear infinite reverse}
+@keyframes sp{to{transform:rotate(360deg)}}
+.trk{stroke:var(--c2);stroke-width:16}.v{stroke:var(--acc);stroke-width:16}.th{stroke-width:6}
+text{text-anchor:middle;fill:var(--tx);font-family:var(--hf)}
+.big{font-size:66px;font-weight:700}.gr{font-size:22px;fill:var(--acc)!important}.sm{font-size:13px;fill:var(--mut)!important;letter-spacing:.2em}
+.over .v{stroke:var(--hot);filter:drop-shadow(0 0 8px var(--hot))}
+.fl{animation:fl .18s infinite alternate}@keyframes fl{to{opacity:.15}}
+.mini{width:92px;flex:none}.mini text{font-size:15px}
+.rb{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--c2);color:var(--acc);font-size:20px;cursor:pointer;transition:all .25s;display:grid;place-items:center;text-decoration:none;flex:none}
+.rb.on{background:var(--acc);color:var(--onacc);box-shadow:0 0 18px var(--acc)}.rb.sm{width:40px;height:40px;font-size:16px}
+.btn{border:1px solid var(--line);background:var(--c2);color:var(--tx);padding:11px 14px;font:600 13px Rajdhani,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;text-align:center;transition:all .2s}
+.btn.p{background:var(--acc);color:var(--onacc);border-color:var(--acc)}.btn.red{background:var(--hot);color:#fff;border-color:var(--hot)}
+.rb:active,.btn:active,.tab:active,.tile:active{transform:scale(.94)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px}
+.tile{background:var(--c2);border:1px solid var(--line);padding:10px 4px;text-align:center;color:var(--mut);font-size:12px;cursor:pointer;transition:all .25s;letter-spacing:.06em;text-transform:uppercase}
+.tile i{display:block;font-style:normal;font-size:20px;color:var(--acc);margin-bottom:2px}
+.tile.on{background:var(--acc);color:var(--onacc)}.tile.on i{color:var(--onacc)}
+.k{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.k div{background:var(--c2);border:1px solid var(--line);padding:8px 2px;text-align:center}.k b{display:block;font-family:var(--hf);font-size:14px;font-weight:500}.k span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+input[type=range]{width:100%;accent-color:var(--acc)}
+input.f,select.f{background:var(--c2);border:1px solid var(--line);padding:11px;color:var(--tx);font:500 16px Rajdhani,sans-serif;width:100%;outline:0;min-width:0}
+input.f:focus{border-color:var(--acc)}
+.step{display:flex;align-items:center;justify-content:space-between}
+.pedal{display:none;width:100%;padding:22px;font-size:16px}body.demo .pedal{display:block}
+.hd{display:flex;align-items:center;gap:12px;background:var(--c2);border:1px solid var(--line);padding:8px;margin-bottom:8px}
+.hd svg{width:30px;height:30px;transition:transform .4s}
+.map{width:100%;height:auto;background:var(--c2);border:1px solid var(--line);display:block}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.chip{background:var(--c2);border:1px solid var(--line);color:var(--tx);padding:12px 6px;font:600 14px Rajdhani,sans-serif;cursor:pointer;transition:all .25s}
+.chip.on{background:var(--acc);color:var(--onacc);box-shadow:0 0 14px var(--acc)}
+.li{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.li .t{flex:1;min-width:0;cursor:pointer}.li .t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.li .t small{color:var(--mut);display:block}
+.li.on .t b{color:var(--acc)}
+.pv{padding:6px 0 10px}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 16px 12px;border-top:1px solid var(--line);background:var(--card)}
+.srch{flex:1;min-width:0;background:var(--c2);border:1px solid var(--line);padding:11px 16px;color:var(--tx);font:500 16px Rajdhani,sans-serif;outline:0;border-radius:24px}
+.srch:focus{border-color:var(--acc)}
+.mini-p{display:flex;align-items:center;gap:6px}#miniTitle{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut);font-size:13px}
+#mic.rec{animation:pulse 1s infinite}@keyframes pulse{50%{box-shadow:0 0 0 12px transparent;background:var(--hot)}}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--bg);border:1px solid var(--acc);color:var(--tx);padding:10px 16px;opacity:0;pointer-events:none;transition:all .3s;z-index:9;display:flex;gap:12px;align-items:center;max-width:92vw;box-shadow:0 0 20px color-mix(in srgb,var(--acc) 40%,transparent)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}#toast a{background:var(--acc);color:var(--onacc);padding:5px 12px;text-decoration:none;font-weight:700}
+ul.h{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:14px;line-height:1.6}
+label.row{margin:8px 0;color:var(--mut)}
+@media(max-width:1000px){.hud{grid-template-columns:1fr}.core{order:-1}}
+@media(max-width:800px){.body{flex-direction:column-reverse}.rail{flex-direction:row;overflow-x:auto;padding:6px 8px;justify-content:flex-start;border-top:1px solid var(--line)}.tab{width:auto;min-width:64px;flex:none}#miniTitle{display:none}.big{font-size:60px}}
+.reactor.talk svg{animation:tk .45s infinite alternate}@keyframes tk{to{filter:drop-shadow(0 0 22px var(--hot))}}
+.noeng #prevS,.noeng #nextS,.noeng #sndBtn,.noeng #pPrev,.noeng #pPlay,.noeng #pNext,.noeng #chips{opacity:.3;pointer-events:none}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nvBox{background:var(--c2);border:1px solid var(--hot);padding:10px;margin-bottom:8px}
+.nvA{font-size:40px;color:var(--hot);font-family:var(--hf);width:50px;text-align:center}.nvD{font-family:var(--hf);font-size:22px}
+.body{flex-direction:column-reverse!important}
+.rail{flex-direction:row!important;overflow-x:auto;justify-content:center!important;align-items:flex-start!important;padding:8px 10px 4px!important;gap:12px!important;border-top:1px solid var(--line);border-right:0!important;background:var(--card);scrollbar-width:none}
+.dk{flex:none;width:74px!important;background:none!important;border:0!important;clip-path:none!important;box-shadow:none!important;color:var(--mut);font:600 9px var(--hf);letter-spacing:.12em;cursor:pointer;padding:2px!important;text-align:center;text-shadow:none!important}
+.dk .ic{position:relative;display:grid;place-items:center;width:50px;height:50px;margin:5px auto 7px;border-radius:50%;font-size:20px;color:var(--acc);background:radial-gradient(circle,var(--c2),transparent 72%);border:2px solid var(--line);transition:all .3s}
+.dk .ic::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px dashed var(--acc);opacity:.5;animation:sp 16s linear infinite}
+.dk .ic::after{content:"";position:absolute;inset:4px;border-radius:50%;border:1px solid transparent;border-top-color:var(--hot);border-bottom-color:var(--acc);animation:sp 4s linear infinite reverse}
+.dk.on{color:var(--acc)}.dk.on .ic{background:var(--acc);color:var(--onacc);box-shadow:0 0 22px var(--acc)}.dk.on .ic::before{opacity:1;animation-duration:6s}
+.dk:active .ic{transform:scale(.92)}
+.top{flex-wrap:wrap}
+.onl{color:#35d07f;animation:blink 1.6s infinite}@keyframes blink{50%{opacity:.35}}
+.dstrip{display:flex;align-items:center;gap:8px;min-width:0;flex:1;max-width:560px;overflow:hidden}.dstrip b{font-family:var(--hf);font-size:26px;text-shadow:0 0 12px var(--acc)}.dstrip>span{font-family:var(--hf);font-size:11px;letter-spacing:.2em;color:var(--acc)}
+#dtl{display:flex;gap:2px;overflow:hidden}#dtl i{font-style:normal;font:500 9px var(--hf);color:var(--mut);padding:3px 2px;min-width:16px;text-align:center;border-bottom:2px solid var(--line)}#dtl i.on{color:var(--onacc);background:var(--acc);border-color:var(--hot)}
+.wxchip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--c2);padding:3px 10px;font:600 13px var(--hf)}.wxchip .wxi{width:26px;height:26px}.wxchip small{color:var(--mut);font:500 11px Rajdhani}
+.wxi{width:62px;height:62px;flex:none}.wxi svg{width:100%;height:100%;overflow:visible}
+.wxi .ray{transform-box:fill-box;transform-origin:center;animation:sp 12s linear infinite}.wxi .cl{animation:drift 5s ease-in-out infinite alternate}.wxi .dr{animation:fall 1s linear infinite}.wxi .dr:nth-of-type(2){animation-delay:.3s}.wxi .dr:nth-of-type(3){animation-delay:.6s}.wxi .bolt{animation:blink .9s infinite}.wxi .tw{animation:blink 2.4s infinite}
+@keyframes drift{to{transform:translateX(4px)}}@keyframes fall{from{transform:translateY(-4px);opacity:0}30%{opacity:1}to{transform:translateY(9px);opacity:0}}
+.suit{width:92px;height:auto;flex:none;overflow:visible}.scan{animation:scan 3.2s linear infinite;opacity:.55}@keyframes scan{from{transform:translateY(0)}to{transform:translateY(217px)}}
+.pulse{animation:pls 1.4s ease-in-out infinite}@keyframes pls{50%{opacity:.25}}#suitCore{animation:pls 1.8s ease-in-out infinite;filter:drop-shadow(0 0 6px var(--acc))}
+.br{display:grid;grid-template-columns:78px 1fr 40px;gap:6px;align-items:center;margin-bottom:7px;font:500 9px var(--hf);letter-spacing:.08em;color:var(--mut)}
+.br i{height:7px;background:var(--c2);border:1px solid var(--line);display:block;position:relative;overflow:hidden}.br u{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--acc),var(--hot));transition:width .25s}.br em{font-style:normal;color:var(--tx);text-align:right}
+.hexes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.hx{width:54px;height:48px;display:grid;place-items:center;font:600 9px var(--hf);letter-spacing:.1em;color:var(--mut);background:var(--c2);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);transition:all .3s}.hx.on{background:var(--acc);color:var(--onacc);filter:drop-shadow(0 0 6px var(--acc))}
+.stark{font-family:var(--hf);font-weight:700;font-style:italic;font-size:20px;letter-spacing:.14em;transform:skewX(-10deg);background:linear-gradient(90deg,var(--tx),var(--mut));-webkit-background-clip:text;background-clip:text;color:transparent;border-bottom:2px solid var(--hot);padding:0 18px 2px;margin-top:2px}
+.qt{font-size:19px;line-height:1.25;margin:6px 0 2px;min-height:48px;transition:opacity .3s}
+.gph{margin-bottom:8px}.gph .row span{font:500 9px var(--hf);letter-spacing:.14em;color:var(--mut)}.gph .row b{font:500 13px var(--hf)}.gph canvas{width:100%;height:46px;display:block;background:var(--c2);border:1px solid var(--line)}
+table.wc{width:100%;border-collapse:collapse;font-size:14px}table.wc td{padding:4px 2px;border-bottom:1px solid var(--line)}table.wc td:last-child{text-align:right;font-family:var(--hf);font-size:13px;color:var(--acc)}
+.tmap{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--c2);border:1px solid var(--line)}.tmap.big{aspect-ratio:16/10}
+.tmap .tl{position:absolute;inset:0;filter:invert(1) hue-rotate(195deg) saturate(.8) brightness(.85) contrast(1.1)}.tmap .tl img{position:absolute;width:256px;height:256px;max-width:none}
+.tmap svg.ov{position:absolute;inset:0;width:100%;height:100%}.tmap .tmsg{position:absolute;left:8px;right:8px;bottom:22px;font-size:12px;color:var(--hot);text-align:center;pointer-events:none}
+.tmap .attr{position:absolute;right:4px;bottom:2px;font-size:10px;color:var(--mut);background:var(--bg);padding:0 4px;opacity:.8}.tmap .zc{position:absolute;left:6px;top:6px;display:flex;flex-direction:column;gap:4px}
+.zm{width:30px;height:30px;border:1px solid var(--line);background:var(--bg);color:var(--acc);font-size:18px;cursor:pointer;opacity:.9}
+.hud{grid-template-columns:minmax(250px,1fr) minmax(340px,1.35fr) minmax(250px,1fr)!important}
+@media(max-width:1000px){.hud{grid-template-columns:1fr!important}}
+@media(max-width:800px){.dstrip #dtl{display:none}.dk{width:62px!important}}
+.hud{align-items:start!important}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+ <svg width="40" height="40" viewBox="0 0 100 100" style="filter:drop-shadow(0 0 6px var(--acc))"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--acc)" stroke-width="4" stroke-dasharray="10 5" class="spin"/><circle cx="50" cy="50" r="28" fill="none" stroke="var(--acc)" stroke-width="5"/><circle cx="50" cy="50" r="10" fill="var(--hot)" class="pulse"/></svg>
+ <div><div class="logo">J.A.R.V.I.S</div><div class="mut" style="font-size:11px;letter-spacing:.15em">STARK INDUSTRIES · ALTO K10 · <span class="onl">SYSTEM ONLINE</span></div></div>
+ <div class="dstrip"><b id="dayNum">--</b><span id="monName"></span><div id="dtl"></div></div>
+ <div class="wxchip" id="wxChip">Weather…</div>
+ <button class="rb sm" id="sndBtn" title="Engine sound">♪</button><button class="rb sm" id="handsBtn" title="Hands-free JARVIS">🎙</button><button class="rb sm" id="thBtn" title="Day/Night">☾</button><button class="rb sm" id="autoBtn" title="Auto volume">⇧</button>
+</header>
+<div class="body">
+<nav class="rail" id="rail"><button class="tab dk on" data-p="home"><span class="ic">◉</span>DRIVE</button><button class="tab dk" data-p="music"><span class="ic">♫</span>MUSIC</button><button class="tab dk" data-p="trips"><span class="ic">⚑</span>TRIPS</button><button class="tab dk" data-p="routes"><span class="ic">⤳</span>ROUTES</button><button class="tab dk" data-p="map"><span class="ic">◎</span>MAP</button><button class="tab dk" data-p="phone"><span class="ic">✆</span>PHONE</button><button class="tab dk" data-p="media"><span class="ic">≋</span>SOUND</button><button class="tab dk" data-p="set"><span class="ic">⚙</span>SETUP</button><button class="dk" id="mvBtn"><span class="ic">M</span>MARVEL</button></nav>
+<main>
+<!-- DRIVE -->
+<section class="pg on" id="home"><div class="hud">
+ <div class="stack">
+  <div class="card"><div class="row sb"><div><div class="clk" id="clock">--:--</div><div class="mut" id="bigdate" style="margin-top:6px;letter-spacing:.08em"></div></div><div class="wxi" id="wxIcon"></div></div>
+   <div class="row" style="margin:8px 0 2px"><b id="wxT" style="font-family:var(--hf);font-size:22px">--°</b><span id="wxC" class="mut">Weather…</span></div>
+   <div class="k"><div><b id="wxH">–</b><span>humidity</span></div><div><b id="wxW">–</b><span>wind km/h</span></div><div><b id="wxF">–</b><span>feels like</span></div><div><b id="wxR">–</b><span>rain %</span></div></div>
+   <div class="mut" id="wxS" style="margin-top:6px"></div></div>
+  <div class="card diag"><h3>System diagnostics</h3><div class="row" style="align-items:stretch;gap:12px">
+   <svg class="suit" viewBox="0 0 120 220"><g fill="none" stroke="var(--acc)" stroke-width="1.4" stroke-linejoin="round">
+    <path d="M50 14Q60 2 70 14L72 34Q60 46 48 34Z" fill="rgba(255,42,58,.18)" style="fill:color-mix(in srgb,var(--hot) 22%,transparent)"/><path d="M52 22h16l-2 14h-12z" style="fill:color-mix(in srgb,var(--acc) 25%,transparent)"/><path d="M54 27h5M61 27h5"/>
+    <rect x="56" y="42" width="8" height="8"/><path d="M30 58Q44 48 60 50Q76 48 90 58L94 78H26Z" style="fill:color-mix(in srgb,var(--hot) 20%,transparent)"/>
+    <path d="M38 78L82 78L78 132L42 132Z"/><path d="M42 132L78 132L76 148L44 148Z" style="fill:color-mix(in srgb,var(--hot) 20%,transparent)"/>
+    <path d="M30 60L16 96L12 138L24 140L30 104L38 80M90 60L104 96L108 138L96 140L90 104L82 80"/>
+    <path d="M44 148L40 196L36 214L54 214L58 196L60 150M76 148L80 196L84 214L66 214L62 196L60 150" style="fill:color-mix(in srgb,var(--hot) 14%,transparent)"/>
+    <path d="M46 100h28M46 112h28M48 124h24" opacity=".5"/></g>
+    <circle id="suitCore" cx="60" cy="92" r="9" fill="var(--acc)"/><circle cx="60" cy="92" r="14" fill="none" stroke="var(--acc)" stroke-dasharray="3 3" class="spin"/>
+    <circle class="pulse" cx="18" cy="142" r="4" fill="var(--acc)"/><circle class="pulse" cx="102" cy="142" r="4" fill="var(--acc)"/><rect class="scan" x="0" y="0" width="120" height="3" fill="var(--acc)"/></svg>
+   <div class="bars" style="flex:1;min-width:0">
+    <div class="br"><span>ENGINE RPM</span><i><u id="bRpm"></u></i><em id="bRpmV">0</em></div><div class="br"><span>THROTTLE</span><i><u id="bThr"></u></i><em id="bThrV">0</em></div>
+    <div class="br"><span>SPEED</span><i><u id="bSpd"></u></i><em id="bSpdV">0</em></div><div class="br"><span>FUEL FLOW</span><i><u id="bFuel"></u></i><em id="bFuelV">0</em></div>
+    <div class="br"><span>GPS SIGNAL</span><i><u id="bGps"></u></i><em id="bGpsV">0</em></div><div class="br"><span>OBD LINK</span><i><u id="bObd"></u></i><em id="bObdV">0</em></div>
+    <div class="br"><span>TABLET POWER</span><i><u id="bBat"></u></i><em id="bBatV">–</em></div></div></div></div>
+  <div class="card"><h3>Launch</h3><div class="tiles"><div class="tile" data-u="https://music.youtube.com"><i>♫</i>YT Music</div><div class="tile" data-u="https://www.youtube.com"><i>▷</i>YouTube</div><div class="tile" data-u="https://www.google.com/maps"><i>⌖</i>Maps</div><div class="tile" data-p="phone"><i>✆</i>Call</div></div></div>
+  <div class="card"><h3>World clocks</h3><table class="wc" id="wc"></table></div>
+ </div>
+
+ <div class="core">
+  <div class="stark">STARK INDUSTRIES</div>
+  <div class="reactor" id="gb">
+   <svg viewBox="-44 -44 588 588">
+    <defs><radialGradient id="rg"><stop offset="0" style="stop-color:#fff;stop-opacity:.95"/><stop offset=".3" style="stop-color:var(--acc);stop-opacity:.7"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/></radialGradient>
+    <linearGradient id="pg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--acc)"/><stop offset=".65" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--hot)"/></linearGradient></defs>
+    <g id="cmp" style="transform-origin:250px 250px;transition:transform .5s linear"><circle class="d" cx="250" cy="250" r="268" stroke-width="1" opacity=".5"/><g id="cmpT"></g></g>
+    <path d="M250 -26l9-16h-18z" fill="var(--hot)"/>
+    <circle class="d spin" cx="250" cy="250" r="243" stroke-width="3" stroke-dasharray="2 9" opacity=".7"/><circle class="d" cx="250" cy="250" r="233" stroke-width="1.5" opacity=".6"/>
+    <circle class="d spin2" cx="250" cy="250" r="226" stroke-width="2" stroke-dasharray="3 8" style="stroke:var(--hot)" opacity=".6"/>
+    <circle class="a trk" cx="250" cy="250" r="214" style="stroke-width:6;stroke-dasharray:1008.5 1344.6"/><circle class="a v th" id="spA" cx="250" cy="250" r="214" style="stroke:url(#pg)"/>
+    <g id="segs"></g>
+    <circle class="d" cx="250" cy="250" r="146" stroke-width="2"/>
+    <circle class="a trk" cx="250" cy="250" r="132" style="stroke-width:5;stroke-dasharray:622 829.4"/><circle class="a v th" id="rpA" cx="250" cy="250" r="132" style="stroke:var(--hot);stroke-width:5"/>
+    <circle class="d spin" cx="250" cy="250" r="116" stroke-width="9" stroke-dasharray="22 6" opacity=".85"/><circle class="d" cx="250" cy="250" r="98" stroke-width="3"/>
+    <circle id="cone" cx="250" cy="250" r="92" fill="url(#rg)" opacity=".3"/>
+    <circle class="d" cx="250" cy="250" r="80" stroke-width="4" style="fill:var(--bg);fill-opacity:.9"/>
+    <path d="M250 250L250 172A78 78 0 0 1 305 195Z" fill="url(#rg)" opacity=".35" style="transform-origin:250px 250px;animation:sp 3.5s linear infinite"/>
+    <text class="sm" x="250" y="198" style="font-size:11px">SPEED</text><text id="spd" class="big" x="250" y="254" style="font-size:56px">0</text><text class="sm" x="250" y="273" style="font-size:11px">KM/H</text>
+    <text id="rpmN" x="250" y="298" style="font-size:17px;font-weight:700">900</text><text class="sm" x="250" y="310" style="font-size:9px">RPM</text><text id="gear" class="gr" x="250" y="326" style="font-size:15px">N</text>
+   </svg>
+  </div>
+  <div class="hexes"><div class="hx" id="hxGps">GPS</div><div class="hx" id="hxObd">OBD</div><div class="hx" id="hxVoice">MIC</div><div class="hx" id="hxFx">FX</div><div class="hx" id="hxNav">NAV</div></div>
+  <div class="row" style="gap:18px"><button class="rb" id="prevS">‹</button><div style="text-align:center"><div class="mut" style="letter-spacing:.2em;font-size:11px">ENGINE</div><div id="pn" style="font-family:var(--hf);font-size:14px">Alto 3-cyl</div></div><button class="rb" id="nextS">›</button></div>
+  <div class="tiles" style="width:100%;max-width:520px"><div class="tile on" id="tGps"><i>⌖</i>GPS</div><div class="tile" id="tDemo"><i>◐</i>Demo</div><div class="tile" id="tObd"><i>ᛒ</i>OBD2</div><div class="tile" id="tVoice"><i>🎙</i>Voice</div><div class="tile on" id="tEng"><i>⚙</i>Engine FX</div></div>
+  <button class="btn p pedal" id="pedal">Hold to accelerate</button>
+  <div class="mut" id="obdMsg" style="text-align:center">OBD2 needs a Bluetooth LE ELM327 dongle + Chrome on Android.</div>
+  <div class="card qcard" style="width:100%;max-width:520px"><div class="row sb"><h3>Marvel archive</h3><button class="rb sm" id="qBtn" title="Random Marvel quote">M</button></div><div id="qText" class="qt">Tap M for a quote, sir.</div><div id="qWho" class="mut"></div></div>
+ </div>
+
+ <div class="stack">
+  <div class="card"><h3>Live telemetry</h3>
+   <div class="gph"><div class="row sb"><span>SPEED</span><b id="gSp">0</b></div><canvas id="cv0" height="46"></canvas></div>
+   <div class="gph"><div class="row sb"><span>ENGINE RPM</span><b id="gRp">0</b></div><canvas id="cv1" height="46"></canvas></div>
+   <div class="gph"><div class="row sb"><span>THROTTLE</span><b id="gTh">0</b></div><canvas id="cv2" height="46"></canvas></div>
+   <div class="gph"><div class="row sb"><span>ACCELERATION</span><b id="gAc">0</b></div><canvas id="cv3" height="46"></canvas></div></div>
+  <div class="card"><h3>Live GPS &amp; directions</h3>
+   <div class="hd"><svg viewBox="0 0 24 24" id="hdA"><path d="M12 2L19 21L12 17L5 21Z" fill="var(--acc)"/></svg><div style="flex:1;min-width:0"><div style="font-family:var(--hf);font-size:16px" id="hdT">– –</div><div class="mut" id="coord">Waiting for GPS…</div></div><button class="rb sm" id="gpsRetry" title="Retry GPS">⟳</button></div>
+   <div class="mut" id="gpsStat" style="margin-bottom:8px"></div>
+   <div class="nvBox" style="display:none"><div class="row"><div class="nvA">↑</div><div style="flex:1;min-width:0"><div class="nvD">–</div><div class="nvT mut">–</div></div><button class="rb sm nvStop" title="Stop navigation">✕</button></div><div class="mut nvR" style="margin-top:6px"></div></div>
+   <div class="tmap" id="map1"><div class="tl"></div><svg class="ov"></svg><div class="tmsg"></div><div class="zc"><button class="zm" data-z="1">+</button><button class="zm" data-z="-1">−</button></div><div class="attr">© OpenStreetMap</div></div>
+   <div class="row" style="margin-top:8px"><input class="f" id="navIn" placeholder="Destination…"><button class="btn p" id="navBtn">Go</button></div>
+   <div class="row" style="margin-top:6px"><button class="btn" id="navGM" style="flex:1">Open in Google Maps</button></div></div>
+  <div class="card"><div class="row sb"><h3>Current trip</h3><button class="btn" id="reset">Clear</button></div><div class="mut" id="curTrip" style="margin-bottom:4px">Trip 1</div>
+   <div class="k"><div><b id="tDist">0.0</b><span>km</span></div><div><b id="tTime">0:00</b><span>time</span></div><div><b id="tAvg">0</b><span>avg</span></div><div><b id="tMax">0</b><span>max</span></div>
+   <div><b id="tFuel">0.00</b><span>fuel L</span></div><div><b id="tL100">–</b><span>L/100</span></div><div><b id="t100">–</b><span>0–100</span></div><div><b id="acc">0.0</b><span>m/s²</span></div></div></div>
+  <div class="card"><h3>Dials</h3><div class="row sb">
+   <svg class="mini" viewBox="0 0 100 100"><circle class="a trk" cx="50" cy="50" r="38" style="stroke-width:8;stroke-dasharray:179 239"/><circle class="a v" id="rA" cx="50" cy="50" r="38" style="stroke-width:8"/><text x="50" y="52" id="rT">0.9k</text><text x="50" y="68" style="font-size:10px;fill:var(--mut)">RPM</text></svg>
+   <svg class="mini" viewBox="0 0 100 100"><circle class="a trk" cx="50" cy="50" r="38" style="stroke-width:8;stroke-dasharray:179 239"/><circle class="a v" id="fA" cx="50" cy="50" r="38" style="stroke-width:8"/><text x="50" y="52" id="fT">–</text><text x="50" y="68" style="font-size:10px;fill:var(--mut)">L/100</text></svg></div></div>
+  <div class="card"><h3>Volume</h3><div class="row sb"><button class="rb sm" id="vDn">−</button><div style="font-family:var(--hf);font-size:30px" id="vv">60</div><button class="rb sm" id="vUp">+</button></div><input type="range" id="vol" min="0" max="100">
+   <div class="step" style="margin-top:10px"><button class="rb sm" id="lDn">−</button><div style="text-align:center"><span id="lv" style="font-family:var(--hf)">Off</span><div class="mut">Speed alert km/h</div></div><button class="rb sm" id="lUp">+</button></div></div>
+ </div>
+</div></section>
+
+<!-- MUSIC -->
+<section class="pg" id="music"><div class="stack" style="max-width:720px;margin:0 auto">
+ <div class="card"><h3>Now playing</h3><div id="mTitle" style="font-family:var(--hf);font-size:18px;margin:6px 0 10px">Nothing playing</div>
+  <input type="range" id="mSeek" min="0" max="1000" value="0"><div class="row sb mut"><span id="mCur">0:00</span><span id="mDur">0:00</span></div>
+  <div class="row" style="justify-content:center;gap:16px;margin:12px 0"><button class="rb sm" id="mShuf">⤨</button><button class="rb" id="mPrev">⏮</button><button class="rb on" id="mPlay" style="width:64px;height:64px">▶</button><button class="rb" id="mNext">⏭</button><button class="rb sm" id="mRep">↻</button></div>
+  <div class="row"><span class="mut">Vol</span><input type="range" id="mVol" min="0" max="100" value="80"></div></div>
+ <div class="card"><div class="seg"><button class="chip on" id="mtLib">Library</button><button class="chip" id="mtPl">Playlists</button><button class="chip" id="mtQ">Queue</button></div>
+  <div id="mLib" style="margin-top:12px"><div class="row sb"><span class="mut">All songs</span><label class="btn p" for="songFile" id="addSongs">+ Add songs</label></div><input type="file" id="songFile" accept="audio/*" multiple hidden>
+   <div id="songList"></div><div class="mut" style="margin-top:8px">⊕ queue · ☰ playlist. Songs are stored on this device and work offline.</div></div>
+  <div id="mPl" style="margin-top:12px;display:none"><div class="row"><input class="f" id="plName" placeholder="New playlist name"><button class="btn p" id="plAdd">Create</button></div><div id="plList"></div></div>
+  <div id="mQ" style="margin-top:12px;display:none"><div class="row sb wrap"><span class="mut" id="qInfo">Queue is empty</span><div class="row"><button class="btn" id="qSave">Save as playlist</button><button class="btn" id="qClear">Clear</button></div></div><div id="qList"></div></div></div>
+</div></section>
+
+<!-- TRIPS -->
+<section class="pg" id="trips"><div class="stack" style="max-width:720px;margin:0 auto">
+ <div class="card"><h3>Current trip</h3><input class="f" id="tripName" placeholder="Trip name"><div class="mut" id="ctStats" style="margin:8px 0">0.0 km</div>
+  <div class="row"><button class="btn p" id="tripSave" style="flex:1">Save trip</button><button class="btn" id="tripNew" style="flex:1">New trip</button></div>
+  <div class="mut" style="margin-top:6px">Saving stores distance, time, fuel and the route, then starts the next trip.</div></div>
+ <div class="card"><h3>Saved trips</h3><div id="tripList"></div></div>
+</div></section>
+
+<!-- ROUTES -->
+<section class="pg" id="routes"><div class="stack" style="max-width:720px;margin:0 auto">
+ <div class="card"><h3>Record a route</h3><div class="mut" id="recInfo">Not recording</div>
+  <div class="row" style="margin-top:8px"><button class="btn p" id="recBtn" style="flex:1">● Start recording</button></div>
+  <div class="row" style="margin-top:8px"><input class="f" id="routeName" placeholder="Route name (optional)"><button class="btn" id="recSave">Save</button></div></div>
+ <div class="card"><h3>Plan a route</h3><input class="f" id="rpName" placeholder="Name, e.g. Home to Office" style="margin-bottom:8px"><input class="f" id="rpFrom" placeholder="From (empty = my location)" style="margin-bottom:8px">
+  <div class="row"><input class="f" id="rpTo" placeholder="To"><button class="btn" id="rpAdd">Save</button></div></div>
+ <div class="card"><h3>Saved routes</h3><div id="routeList"></div></div>
+</div></section>
+
+<!-- MAP -->
+<section class="pg" id="map"><div class="stack" style="max-width:720px;margin:0 auto">
+ <div class="card"><div class="tmap big" id="map2"><div class="tl"></div><svg class="ov"></svg><div class="tmsg"></div><div class="zc"><button class="zm" data-z="1">+</button><button class="zm" data-z="-1">−</button></div><div class="attr">© OpenStreetMap</div></div>
+  <div class="k"><div><b id="mLat">–</b><span>lat</span></div><div><b id="mLon">–</b><span>lon</span></div><div><b id="mHd">–</b><span>heading</span></div><div><b id="mAcc">–</b><span>± m</span></div></div><div class="mut" id="gpsStat2" style="margin-top:8px"></div><button class="btn" id="gpsRetry2" style="margin-top:8px">⟳ Retry GPS</button><div class="nvBox" style="display:none"><div class="row"><div class="nvA">↑</div><div style="flex:1;min-width:0"><div class="nvD">–</div><div class="nvT mut">–</div></div><button class="rb sm nvStop" title="Stop navigation">✕</button></div><div class="mut nvR" style="margin-top:6px"></div></div></div>
+ <div class="card"><h3>Navigate</h3><div class="row"><input class="f" id="navIn2" placeholder="Destination"><button class="btn p" id="navBtn2">Go</button></div>
+  <div class="tiles" style="margin-top:10px"><div class="tile" data-q="petrol pump"><i>⛽</i>Petrol</div><div class="tile" data-q="parking"><i>P</i>Parking</div><div class="tile" data-q="restaurants"><i>🍴</i>Food</div><div class="tile" data-q="hospital"><i>✚</i>Hospital</div></div>
+  <div class="mut" style="margin-top:8px">Your live GPS trail is drawn here. Turn-by-turn opens in Google Maps.</div></div>
+</div></section>
+
+<!-- PHONE -->
+<section class="pg" id="phone"><div class="stack" style="max-width:640px;margin:0 auto">
+ <div class="card"><h3>Dial</h3><div class="row"><input class="f" id="num" type="tel" placeholder="Phone number"><button class="btn p" id="callBtn">Call</button></div><div class="row" style="margin-top:8px"><a class="btn red" href="tel:112" style="flex:1">Emergency 112</a></div></div>
+ <div class="card"><div class="row sb"><h3>Contacts</h3><button class="btn" id="imp">Import</button></div><div class="mut">Say “Jarvis, call Mom”.</div><div id="favs"></div>
+  <div class="row" style="margin-top:10px"><input class="f" id="fn" placeholder="Name"><input class="f" id="ft" type="tel" placeholder="Number"><button class="btn" id="fadd">Add</button></div></div>
+</div></section>
+
+<!-- SOUND + APPS -->
+<section class="pg" id="media"><div class="stack" style="max-width:720px;margin:0 auto">
+ <div class="card"><div class="row sb"><div><h3 id="pn2">Alto 3-cyl</h3><div class="mut">Engine sound</div></div><div class="row"><button class="rb sm" id="pPrev">⏮</button><button class="rb sm on" id="pPlay">▶</button><button class="rb sm" id="pNext">⏭</button></div></div><div class="chips" id="chips" style="margin-top:12px"></div></div>
+ <div class="card"><h3>YouTube / YT Music</h3><input class="f" id="mq" placeholder="Song, artist or video">
+  <div class="row" style="margin-top:8px"><button class="btn p" id="mYTM" style="flex:1">YT Music</button><button class="btn" id="mYT" style="flex:1">YouTube</button></div></div>
+</div></section>
+
+<!-- SETUP -->
+<section class="pg" id="set"><div class="stack" style="max-width:700px;margin:0 auto">
+ <div class="card"><h3>Voice</h3><div class="mut">Tap 🎙 for one command, or switch on hands-free and begin with “Jarvis…”</div>
+  <select class="f" id="lang" style="margin:10px 0"><option value="en-IN">English (India)</option><option value="en-US">English (US)</option><option value="hi-IN">Hindi</option></select>
+  <label class="row"><input type="checkbox" id="speak"> Speak replies</label>
+  <ul class="h"><li>“Jarvis, navigate to Connaught Place” / “stop navigation”</li><li>“Jarvis, play my music” / “next song” / “pause”</li><li>“Jarvis, play playlist Road Trip”</li><li>“Jarvis, add Kesariya to the queue”</li><li>“Jarvis, call Mom”</li><li>“Jarvis, next sound” / “switch to V8”</li><li>“Jarvis, turn off the engine sound changer”</li><li>“Jarvis, save trip” / “start recording”</li><li>“Jarvis, status report” / “I’m home” / “thank you”</li><li>“Jarvis, I’m tired” / “calm down” / “red alert”</li><li>“Jarvis, what’s the weather?”</li><li>“Jarvis, tell me a Marvel quote”</li></ul></div>
+ <div class="card"><h3>Engine sound changer</h3><label class="row"><input type="checkbox" id="engSw" checked> Enable engine sound changer</label><div class="mut">When off, no engine sounds play and the engine controls are disabled.</div></div>
+ <div class="card"><h3>Display</h3><div class="row wrap" style="margin-top:6px"><button class="btn" data-th="auto">Auto</button><button class="btn" data-th="light">Blueprint</button><button class="btn" data-th="dark">Night</button><button class="btn" id="fs">Full screen</button></div>
+  <div class="row wrap" style="margin-top:8px"><button class="btn" data-acc="cyan">Arc blue</button><button class="btn" data-acc="red">Mark red</button></div></div>
+ <div class="card"><h3>Voice tuning</h3><select class="f" id="voiceSel"></select>
+  <label>Pitch<input type="range" id="vPitch" min="30" max="130" value="78"></label><label>Speed<input type="range" id="vRate" min="60" max="130" value="94"></label>
+  <div class="row"><button class="btn p" id="vTest">Test voice</button></div>
+  <label class="row"><input type="checkbox" id="wakeSw"> Require “Jarvis” before commands in hands-free</label><label class="row"><input type="checkbox" id="idleSw"> Random Marvel quotes when idle</label>
+  <div class="mut">Voices come from your phone. Pick a British male voice for the closest JARVIS sound; add more in Android Settings → Text-to-speech.</div></div>
+ <div class="card"><h3>Sync between devices</h3><div class="mut">Move trips, routes, playlists, contacts and settings (and optionally songs) to your other device.</div>
+  <label class="row"><input type="checkbox" id="bkSongs"> Include songs</label>
+  <div class="row wrap"><button class="btn p" id="bkExport">Export backup</button><label class="btn" for="bkFile">Import backup</label><input type="file" id="bkFile" accept=".zip,.jarvis,application/zip" style="position:absolute;opacity:0;width:1px;height:1px"></div>
+  <div class="mut" style="margin-top:6px">Export opens the share sheet. Choose Google Drive, then open the file on the other device and tap Import.</div>
+  <h3 style="margin-top:14px">Google Drive auto-sync (advanced)</h3><input class="f" id="gdId" placeholder="Google OAuth Client ID">
+  <div class="row" style="margin-top:8px"><button class="btn" id="gdBtn">Sync with Drive</button></div><div class="mut" id="syncStat" style="margin-top:6px"></div></div>
+ <div class="card"><h3>Install</h3><div class="mut">Chrome menu ⋮ → Add to Home screen (or Install app). Host the downloaded package for a full offline app.</div></div>
+</div></section>
+</main>
+</div>
+<footer class="bar">
+ <input class="srch" id="cmd" placeholder="Ask JARVIS…" enterkeyhint="go">
+ <button class="rb sm on" id="mic" title="Voice">🎙</button>
+ <div class="mini-p"><span id="miniTitle">No song</span><button class="rb sm" id="miniPrev">⏮</button><button class="rb sm on" id="miniPlay">▶</button><button class="rb sm" id="miniNext">⏭</button></div>
+</footer>
+</div>
+<div id="toast"><span id="tmsg"></span><a id="tlink" target="_blank" rel="noopener">Open</a></div>
+<script>
+var FLAV=false,PEND=null,MEM=[],memId=0,NEXTV=null,TZ=0,WAKE=/^(hey |ok |okay )?(jarvis|jarvas|travis|service|gervais|garvis|charvis|jarvice|jarvus|java is|jarvi|jarvish|jervis)\b[ ,]*/i;
+
+const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
+const PROFILES = {
+ "Alto 3-cyl":{cyl:3,w1:"sawtooth",w2:"square",lp:1400,noise:.05,gain:1,am:.15},
+ "V8 Muscle":{cyl:8,w1:"sawtooth",w2:"square",lp:700,noise:.08,gain:1.2,am:.25},
+ "V6":{cyl:6,w1:"sawtooth",w2:"triangle",lp:1500,noise:.05,gain:1,am:.1},
+ "Sports 4":{cyl:4,w1:"sawtooth",w2:"sawtooth",lp:2600,noise:.04,gain:.9,am:0},
+ "Turbo":{cyl:4,w1:"sawtooth",w2:"square",lp:2200,noise:.05,gain:.95,am:.05,turbo:true},
+ "Boxer":{cyl:4,w1:"sawtooth",w2:"square",lp:900,noise:.07,gain:1.1,am:.35},
+ "Diesel":{cyl:4,w1:"square",w2:"square",lp:650,noise:.12,gain:1.1,am:.4,pitch:.7},
+ "F1 V10":{cyl:10,w1:"sawtooth",w2:"sawtooth",lp:4200,noise:.03,gain:.8,am:0,pitch:1.5},
+ "Superbike":{cyl:4,w1:"sawtooth",w2:"square",lp:3200,noise:.05,gain:.9,am:.05,pitch:1.7},
+ "Rotary":{cyl:3,w1:"sawtooth",w2:"sine",lp:3600,noise:.03,gain:.85,am:0,pitch:2},
+ "EV Whine":{cyl:0,w1:"sine",w2:"triangle",lp:5000,noise:0,gain:.7,am:0,ev:true,evk:1},
+ "Spaceship":{cyl:0,w1:"sine",w2:"sawtooth",lp:3000,noise:0,gain:.6,am:.2,ev:true,evk:1.6}
+};
+const NAMES = Object.keys(PROFILES);
+const ALIAS = [[/\balto\b|3.?cyl/,"Alto 3-cyl"],[/\bv ?8\b|muscle/,"V8 Muscle"],[/\bv ?6\b/,"V6"],[/sports/,"Sports 4"],[/turbo/,"Turbo"],[/boxer/,"Boxer"],[/diesel/,"Diesel"],[/f ?1|formula/,"F1 V10"],[/bike/,"Superbike"],[/rotary/,"Rotary"],[/\bev\b|electric/,"EV Whine"],[/space/,"Spaceship"]];
+const CFG = {prof:"Alto 3-cyl",theme:"auto",vol:60,auto:true,limit:0,lang:"en-IN",speak:true};
+const TRIP = {dist:0,time:0,max:0,fuel:0}; let FAV = [];
+try{ Object.assign(CFG,JSON.parse(localStorage.getItem("ad3.cfg")||"{}")); Object.assign(TRIP,JSON.parse(localStorage.getItem("ad3.trip")||"{}")); FAV = JSON.parse(localStorage.getItem("ad3.fav")||"[]"); }catch(e){}
+if(!PROFILES[CFG.prof]) CFG.prof = NAMES[0];
+const save = () => { try{ localStorage.setItem("ad3.cfg",JSON.stringify(CFG)); localStorage.setItem("ad3.trip",JSON.stringify(TRIP)); localStorage.setItem("ad3.fav",JSON.stringify(FAV)); }catch(e){} };
+
+const S = {speed:0,prev:0,acc:0,rpm:900,throttle:0,gear:0,mode:"gps",pedal:false,lastFix:0,obdOn:false,boost:0,blow:false,flow:.7};
+const Z = {ready:true,run:false,t0:0,res:null}, O = {rpm:900,speed:0,thr:14};
+const GK = [0,7,13,19,26,33], IDLE = 900, REDLINE = 6500;
+
+// ---------- toast ----------
+let tt; function toast(m,u){ $("tmsg").textContent = m; const a = $("tlink"); a.style.display = u ? "" : "none"; if(u) a.href = u; $("toast").classList.add("on"); clearTimeout(tt); tt = setTimeout(() => $("toast").classList.remove("on"), u ? 9000 : 3500); }
+function say(m){ if(FLAV){ FLAV = false; m = flav(m); } toast(m); if(CFG.speak && window.speechSynthesis){ try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(m); u.lang = CFG.lang; jv(u); speechSynthesis.speak(u); }catch(e){} } }
+function openUrl(u,m,same){ say(m); toast(m,u); try{ same ? (location.href = u) : window.open(u,"_blank"); }catch(e){} }
+
+// ---------- audio ----------
+let ctx,o1,o2,am,lfo,lfoG,lp,master,noiseSrc,nGain,wo,wGain,bGain,started = false,lastBeep = 0;
+function startAudio(){
+ if(started) return;
+ ctx = new (window.AudioContext||window.webkitAudioContext)();
+ o1 = ctx.createOscillator(); o2 = ctx.createOscillator();
+ const g1 = ctx.createGain(), g2 = ctx.createGain(); g1.gain.value = .6; g2.gain.value = .4; o1.connect(g1); o2.connect(g2);
+ am = ctx.createGain(); lfo = ctx.createOscillator(); lfoG = ctx.createGain(); lfo.connect(lfoG); lfoG.connect(am.gain); g1.connect(am); g2.connect(am);
+ lp = ctx.createBiquadFilter(); lp.type = "lowpass"; am.connect(lp);
+ master = ctx.createGain(); master.gain.value = 0; const comp = ctx.createDynamicsCompressor();
+ const buf = ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate), d = buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+ noiseSrc = ctx.createBufferSource(); noiseSrc.buffer = buf; noiseSrc.loop = true;
+ nGain = ctx.createGain(); nGain.gain.value = 0; const nf = ctx.createBiquadFilter(); nf.type = "bandpass"; nf.frequency.value = 600;
+ noiseSrc.connect(nf); nf.connect(nGain); nGain.connect(lp); lp.connect(master); master.connect(comp); comp.connect(ctx.destination);
+ wo = ctx.createOscillator(); wGain = ctx.createGain(); wGain.gain.value = 0; wo.connect(wGain); wGain.connect(comp);
+ const bf = ctx.createBiquadFilter(); bf.type = "highpass"; bf.frequency.value = 2500; bGain = ctx.createGain(); bGain.gain.value = 0; noiseSrc.connect(bf); bf.connect(bGain); bGain.connect(comp);
+ [o1,o2,lfo,wo,noiseSrc].forEach(n => n.start()); started = true; applyProfile(); sndUI();
+}
+function stopAudio(){ if(!started) return; ctx.close(); started = false; sndUI(); }
+function sndUI(){ $("sndBtn").classList.toggle("on",started); $("pPlay").textContent = started ? "❚❚" : "▶"; }
+function applyProfile(){
+ $("pn").textContent = $("pn2").textContent = CFG.prof; $$(".chip").forEach(c => c.classList.toggle("on",c.textContent === CFG.prof));
+ if(!started) return; const p = PROFILES[CFG.prof]; o1.type = p.w1; o2.type = p.w2; lp.frequency.value = p.lp; am.gain.value = 1-p.am/2; lfoG.gain.value = p.am/2;
+}
+function stepProf(n){ CFG.prof = NAMES[(NAMES.indexOf(CFG.prof)+n+NAMES.length)%NAMES.length]; applyProfile(); save(); return CFG.prof; }
+function setVol(v){ CFG.vol = Math.max(0,Math.min(100,Math.round(v))); $("vol").value = CFG.vol; $("vv").textContent = CFG.vol; save(); }
+function beep(){ if(!started) return; const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime; o.frequency.value = 880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.15,t+.02); g.gain.linearRampToValueAtTime(0,t+.25); o.start(t); o.stop(t+.3); }
+function updateAudio(){
+ if(!started) return; const p = PROFILES[CFG.prof], t = ctx.currentTime;
+ const f = p.ev ? 80+S.speed*14*(p.evk||1) : (S.rpm/60)*(p.cyl/2)*(p.pitch||1);
+ o1.frequency.setTargetAtTime(f,t,.05); o2.frequency.setTargetAtTime(f*(p.ev?2:.5),t,.05); lfo.frequency.setTargetAtTime(Math.max(3,f*.5),t,.1);
+ const load = .25+.75*S.throttle; lp.frequency.setTargetAtTime(p.lp*(.6+.8*load),t,.08); nGain.gain.setTargetAtTime(p.noise*load,t,.1);
+ const vol = CFG.vol/100*(CFG.auto ? 1+S.speed/160 : 1), evk = p.ev ? Math.min(1,.15+S.speed/20) : 1;
+ master.gain.setTargetAtTime(vol*p.gain*evk*(.12+.28*load),t,.08);
+ if(p.turbo){
+  S.boost += (S.throttle*Math.min(1,S.rpm/4500)-S.boost)*.04; wo.frequency.setTargetAtTime(1500+S.boost*3500,t,.05); wGain.gain.setTargetAtTime(vol*.05*S.boost*S.boost,t,.05);
+  if(S.blow){ S.blow = false; bGain.gain.cancelScheduledValues(t); bGain.gain.setValueAtTime(vol*.25*Math.max(.3,S.boost),t); bGain.gain.exponentialRampToValueAtTime(.0005,t+.6); }
+ } else { wGain.gain.setTargetAtTime(0,t,.05); S.boost = 0; S.blow = false; }
+}
+
+// ---------- driving model ----------
+function step(dt){
+ const a = (S.speed-S.prev)/3.6/dt; S.acc += (a-S.acc)*.15; S.prev = S.speed;
+ let th = S.speed < 1 ? (S.pedal?1:0) : Math.max(0,Math.min(1,.2+S.acc/2.5)); if(S.acc < -.4) th = 0;
+ if(S.obdOn) th = Math.max(0,Math.min(1,(O.thr-14)/70));
+ const pt = S.throttle; S.throttle += (th-S.throttle)*.2; if(pt > .6 && S.throttle < pt-.08 && S.rpm > 2500) S.blow = true;
+ if(S.obdOn) S.gear = obdGear(); else if(S.speed < 3) S.gear = 0; else {
+  if(S.gear === 0) S.gear = 1; const r = g => S.speed/GK[g]*1000, up = 2600+2200*S.throttle;
+  if(S.gear < 5 && r(S.gear) > up) S.gear++; else if(S.gear > 1 && r(S.gear) < 1300) S.gear--; }
+ let tg = S.gear === 0 ? IDLE+(S.pedal?4500:0) : Math.max(IDLE,S.speed/GK[S.gear]*1000); tg = Math.min(REDLINE,tg+S.throttle*300); if(S.obdOn) tg = O.rpm;
+ S.rpm += (tg-S.rpm)*.25;
+ const fl = .7+(S.rpm/1000)*(.5+3.5*S.throttle)*(S.rpm > 1100 || S.speed > 1 ? 1 : .2); S.flow += (fl-S.flow)*.1;
+ if(S.speed > 1){ TRIP.dist += S.speed*dt/3600; TRIP.time += dt; TRIP.max = Math.max(TRIP.max,S.speed); } TRIP.fuel += S.flow*dt/3600;
+ if(S.speed < 1.5){ Z.ready = true; Z.run = false; } else if(Z.ready && !Z.run){ Z.run = true; Z.ready = false; Z.t0 = performance.now(); }
+ if(Z.run && S.speed >= 100){ Z.res = (performance.now()-Z.t0)/1000; Z.run = false; }
+ if(CFG.limit > 0 && S.speed > CFG.limit+2 && Date.now()-lastBeep > 3000){ lastBeep = Date.now(); beep(); jwarn(); }
+}
+
+// ---------- render ----------
+const D = {s:0,r:900}, CS = 2*Math.PI*214, CR = 2*Math.PI*132, CM = 2*Math.PI*38;
+const fmtT = s => { s = Math.floor(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return (h ? h+":"+String(m).padStart(2,"0") : m)+":"+String(s%60).padStart(2,"0"); };
+function arc(el,c,f){ f = Math.max(0,Math.min(1,f)); el.style.strokeDasharray = (.75*c*f)+" "+c; el.style.strokeOpacity = f < .004 ? 0 : 1; }
+function frame(){
+ D.s += (S.speed-D.s)*.18; D.r += (S.rpm-D.r)*.25;
+ arc($("spA"),CS,D.s/160); arc($("rpA"),CR,D.r/REDLINE); arc($("rA"),CM,D.r/REDLINE);
+ const l100 = S.speed > 3 ? S.flow/S.speed*100 : 0; arc($("fA"),CM,Math.min(1,l100/20));
+ $("spd").textContent = Math.round(D.s); $("gear").textContent = S.gear === 0 ? "N" : S.gear;
+ $("rT").textContent = (D.r/1000).toFixed(1)+"k"; $("fT").textContent = S.speed > 3 ? l100.toFixed(1) : S.flow.toFixed(1)+"/h";
+ $("rpA").classList.toggle("fl",D.r > REDLINE*.85); $("gb").classList.toggle("over",CFG.limit > 0 && S.speed > CFG.limit+2);
+ $("cone").setAttribute("opacity",(.2+.8*S.throttle).toFixed(2));
+ if($("home").classList.contains("on")){
+  $("acc").textContent = S.acc.toFixed(1); $("tDist").textContent = TRIP.dist.toFixed(1); $("tTime").textContent = fmtT(TRIP.time);
+  $("tAvg").textContent = TRIP.time > 5 ? Math.round(TRIP.dist/TRIP.time*3600) : 0; $("tMax").textContent = Math.round(TRIP.max); $("tFuel").textContent = TRIP.fuel.toFixed(2);
+  $("tL100").textContent = TRIP.dist > .2 ? (TRIP.fuel/TRIP.dist*100).toFixed(1) : "–";
+  $("t100").textContent = Z.run ? ((performance.now()-Z.t0)/1000).toFixed(1)+"s" : (Z.res ? Z.res.toFixed(1)+"s" : "–");
+ }
+ requestAnimationFrame(frame);
+}
+
+// ---------- GPS + live map ----------
+let lastPos = null; const TR = [];
+function drawMap(svg){
+ if(!svg) return;
+ let h = '<g stroke="var(--line)" stroke-width="1">'; for(let i=0;i<=300;i+=50) h += `<line x1="${i}" y1="0" x2="${i}" y2="220"/>`; for(let j=0;j<=220;j+=55) h += `<line x1="0" y1="${j}" x2="300" y2="${j}"/>`; h += "</g>";
+ if(TR.length){
+  const c = TR[TR.length-1], k = Math.cos(c.la*Math.PI/180);
+  const pts = TR.map(p => [(p.lo-c.lo)*111320*k, -(p.la-c.la)*110540]); let ext = 120; pts.forEach(p => ext = Math.max(ext,Math.abs(p[0])*1.2,Math.abs(p[1])*1.6));
+  const sc = 100/ext*1.0, poly = pts.map(p => (150+p[0]*sc).toFixed(1)+","+(110+p[1]*sc).toFixed(1)).join(" ");
+  h += `<polyline points="${poly}" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>`;
+  h += `<g transform="translate(150 110) rotate(${c.hd||0})"><circle r="14" fill="var(--acc)" opacity=".2"/><path d="M0-10L7 8L0 4L-7 8Z" fill="var(--acc)"/></g>`;
+ } else h += '<text x="150" y="115" text-anchor="middle" fill="var(--mut)" font-size="14">Waiting for GPS…</text>';
+ svg.innerHTML = h;
+}
+const CARD = ["N","NE","E","SE","S","SW","W","NW"];
+function startGps(){
+ if(!("geolocation" in navigator)){ $("coord").textContent = "GPS not supported"; return; }
+ navigator.geolocation.watchPosition(pos => {
+  const c = pos.coords; let v = c.speed;
+  if(v == null && lastPos){ const R = 6371000, r = Math.PI/180, a = (c.latitude-lastPos.coords.latitude)*r, b = (c.longitude-lastPos.coords.longitude)*r;
+   const h = Math.sin(a/2)**2+Math.cos(lastPos.coords.latitude*r)*Math.cos(c.latitude*r)*Math.sin(b/2)**2; v = 2*R*Math.asin(Math.sqrt(h))/Math.max(.5,(pos.timestamp-lastPos.timestamp)/1000); }
+  lastPos = pos; S.lastFix = Date.now();
+  if(S.mode === "gps"){ S.speed = Math.max(0,(v||0)*3.6); if(S.speed < 2) S.speed = 0; }
+  const hd = c.heading != null && !isNaN(c.heading) ? c.heading : (TR.length ? TR[TR.length-1].hd : 0);
+  const last = TR[TR.length-1]; if(!last || Math.abs(last.la-c.latitude)+Math.abs(last.lo-c.longitude) > .00004){ TR.push({la:c.latitude,lo:c.longitude,hd}); if(TR.length > 250) TR.shift(); } else last.hd = hd;
+  $("hdT").textContent = Math.round(hd)+"° "+CARD[Math.round(hd/45)%8]; $("hdA").style.transform = `rotate(${hd}deg)`;
+  $("coord").textContent = c.latitude.toFixed(4)+", "+c.longitude.toFixed(4)+" ±"+Math.round(c.accuracy)+"m";
+  $("mLat").textContent = c.latitude.toFixed(4); $("mLon").textContent = c.longitude.toFixed(4); $("mHd").textContent = Math.round(hd)+"°"; $("mAcc").textContent = Math.round(c.accuracy);
+  drawMap($("map1")); if($("map").classList.contains("on")) drawMap($("map2"));
+ }, err => { $("coord").textContent = "GPS: "+err.message; }, {enableHighAccuracy:true,maximumAge:500,timeout:10000});
+}
+function setMode(m){
+ S.mode = m; S.obdOn = m === "obd"; if(m === "demo") S.speed = 0; document.body.classList.toggle("demo",m === "demo");
+ $("tGps").classList.toggle("on",m === "gps"); $("tDemo").classList.toggle("on",m === "demo"); $("tObd").classList.toggle("on",m === "obd");
+}
+
+// ---------- OBD2 (BLE ELM327) ----------
+let obdChar = null,obdBuf = "",obdQ = 0,obdBusy = false,obdTimer = null;
+const OBD_S = ["0000fff0-0000-1000-8000-00805f9b34fb","0000ffe0-0000-1000-8000-00805f9b34fb","e7810a71-73ae-499d-8c15-faa9aef0c3f2","000018f0-0000-1000-8000-00805f9b34fb"], PIDS = ["010C","010D","0111"];
+const obdSend = async c => { if(obdChar) await obdChar.writeValue(new TextEncoder().encode(c+"\r")); };
+async function connectObd(){
+ const msg = $("obdMsg");
+ if(!navigator.bluetooth){ msg.textContent = "Web Bluetooth unavailable. Use Chrome on Android, open the page directly."; setMode("gps"); return; }
+ try{
+  msg.textContent = "Choose your OBD dongle…"; const dev = await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:OBD_S}), srv = await dev.gatt.connect(); let nc = null, wc = null;
+  for(const u of OBD_S){ try{ const sv = await srv.getPrimaryService(u); for(const c of await sv.getCharacteristics()){ if(!nc && c.properties.notify) nc = c; if(!wc && (c.properties.write || c.properties.writeWithoutResponse)) wc = c; } if(nc && wc) break; }catch(e){} }
+  if(!nc || !wc) throw new Error("needs a BLE ELM327 dongle");
+  obdChar = wc; await nc.startNotifications(); nc.addEventListener("characteristicvaluechanged",onObd);
+  dev.addEventListener("gattserverdisconnected",() => { clearInterval(obdTimer); obdChar = null; setMode("gps"); msg.textContent = "OBD disconnected. Back to GPS."; say("We are losing power, sir. The OBD link is gone. Back to GPS."); });
+  msg.textContent = "Initialising…"; for(const c of ["ATZ","ATE0","ATL0","ATS0","ATH0","ATSP0"]){ await obdSend(c); await new Promise(r => setTimeout(r,c === "ATZ" ? 1200 : 250)); }
+  obdBuf = ""; obdBusy = false; obdQ = 0; setMode("obd"); msg.textContent = "OBD connected. Ignition on / engine running."; obdTimer = setInterval(pollObd,120);
+ }catch(e){ msg.textContent = "OBD failed: "+e.message; setMode("gps"); }
+}
+function pollObd(){ if(obdBusy || !obdChar) return; obdBusy = true; setTimeout(() => { obdBusy = false; },800); obdSend(PIDS[obdQ++%3]).catch(() => { obdBusy = false; }); }
+function onObd(ev){
+ obdBuf += new TextDecoder().decode(ev.target.value); if(obdBuf.indexOf(">") < 0) return;
+ const cl = obdBuf.replace(/\s+/g,"").replace(/SEARCHING\.\.\./g,""); obdBuf = ""; obdBusy = false; const m = cl.match(/41(0C|0D|11)([0-9A-F]+)/i); if(!m) return;
+ const p = m[1].toUpperCase(), h = m[2];
+ if(p === "0C" && h.length >= 4) O.rpm = (parseInt(h.slice(0,2),16)*256+parseInt(h.slice(2,4),16))/4; else if(p === "0D" && h.length >= 2) O.speed = parseInt(h.slice(0,2),16); else if(p === "11" && h.length >= 2) O.thr = parseInt(h.slice(0,2),16)*100/255;
+}
+function obdGear(){ if(O.speed < 3) return 0; const r = O.speed/Math.max(500,O.rpm)*1000; let b = 1,d = 1e9; for(let g=1;g<=5;g++){ const x = Math.abs(GK[g]-r); if(x < d){ d = x; b = g; } } return b; }
+
+// ---------- contacts ----------
+function renderFav(){
+ const el = $("favs"); el.innerHTML = "";
+ FAV.forEach((f,i) => {
+  const d = document.createElement("div"); d.className = "fav"; const s = document.createElement("span"); s.textContent = f.name; const sm = document.createElement("small"); sm.textContent = f.tel; s.appendChild(sm);
+  const c = document.createElement("a"); c.className = "rb sm on"; c.textContent = "✆"; c.href = "tel:"+f.tel.replace(/[^\d+]/g,"");
+  const x = document.createElement("button"); x.className = "rb sm"; x.textContent = "✕"; x.onclick = () => { FAV.splice(i,1); save(); renderFav(); };
+  d.append(s,c,x); el.appendChild(d);
+ });
+}
+function callName(q){
+ const digits = q.replace(/[^\d+]/g,""); const f = FAV.find(x => { const n = x.name.toLowerCase(); return q.includes(n) || n.includes(q) || n.split(" ").some(w => w.length > 2 && q.includes(w)); });
+ if(f) return openUrl("tel:"+f.tel.replace(/[^\d+]/g,""),"Calling "+f.name,true);
+ if(digits.length >= 3) return openUrl("tel:"+digits,"Calling "+digits,true);
+ say("No contact named "+q+". Add it in the Phone tab.");
+}
+
+// ---------- navigation + pages ----------
+function go(p){ $$(".pg").forEach(x => x.classList.toggle("on",x.id === p)); $$("#rail .tab").forEach(b => b.classList.toggle("on",b.dataset.p === p)); if(p === "map") drawMap($("map2")); if(typeof onPage === "function") onPage(p); }
+const mapsDir = q => openUrl("https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(q),"Navigating to "+q);
+const mapsFind = q => openUrl("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q),"Searching "+q);
+const ytm = q => openUrl(q ? "https://music.youtube.com/search?q="+encodeURIComponent(q) : "https://music.youtube.com","Opening YouTube Music"+(q ? ": "+q : ""));
+const yt = q => openUrl(q ? "https://www.youtube.com/results?search_query="+encodeURIComponent(q) : "https://www.youtube.com","Opening YouTube"+(q ? ": "+q : ""));
+function setTheme(t){ CFG.theme = t; applyTheme(); save(); }
+function setLimit(n){ CFG.limit = Math.max(0,Math.min(200,n)); $("lv").textContent = CFG.limit ? CFG.limit : "Off"; save(); }
+
+// ---------- voice commands ----------
+function cmd0(raw){
+ const t = raw.toLowerCase().replace(/[.,!?]/g,"").replace(WAKE,"").trim(); let m; if(!t) return say("Yes?");
+ if(/\bhelp\b|what can you do/.test(t)) return say("Try: navigate to a place, play a song, call someone, next sound, volume up, start sound, night mode, my speed.");
+ if(m = t.match(/(?:navigate|take me|directions?|drive|go) to (.+)/)) return mapsDir(m[1]);
+ if(m = t.match(/(?:find|search|show)(?: me)? (.+?) (?:near me|nearby|around me|near by)/)) return mapsFind(m[1]+" near me");
+ if(m = t.match(/^(?:call|dial|phone|ring) (.+)/)) return callName(m[1]);
+ if(/(next|skip|change).*(sound|engine)|^next$/.test(t)) return say("Sound: "+stepProf(1));
+ if(/(previous|last|back).*(sound|engine)/.test(t)) return say("Sound: "+stepProf(-1));
+ const al = ALIAS.find(a => a[0].test(t));
+ if(al && /(sound|engine|switch|change|use|select|mode)/.test(t) && !/youtube|music/.test(t)){ CFG.prof = al[1]; applyProfile(); save(); if(/play|start/.test(t)) startAudio(); return say("Sound: "+al[1]); }
+ if(/(start|play|turn on|enable|begin).*(engine|sound)/.test(t)){ startAudio(); return started ? say("Engine sound on") : undefined; }
+ if(/(stop|turn off|disable|pause|mute|silence).*(engine|sound)?|^(stop|mute|quiet)$/.test(t) && !/youtube|music|navigation/.test(t)){ stopAudio(); return say("Engine sound off"); }
+ if(m = t.match(/volume (?:to |at )?(\d+)/)){ setVol(+m[1]); return say("Volume "+CFG.vol); }
+ if(/volume (up|increase)|louder|turn it up/.test(t)){ setVol(CFG.vol+15); return say("Volume "+CFG.vol); }
+ if(/volume (down|decrease)|quieter|lower|turn it down/.test(t)){ setVol(CFG.vol-15); return say("Volume "+CFG.vol); }
+ if(/(max|full) volume/.test(t)){ setVol(100); return say("Volume max"); }
+ if(/youtube music|yt music/.test(t) && !/^play /.test(t)) return ytm("");
+ if(m = t.match(/^play (.+)/)){ const onYT = / on youtube$/.test(m[1]), q = m[1].replace(/ on (youtube music|yt music|youtube|music)$/,""); return onYT ? yt(q) : ytm(q); }
+ if(m = t.match(/^(?:open )?youtube(?: search| for)? ?(.*)/)) return yt(m[1]);
+ if(/open (google )?maps/.test(t)) return openUrl("https://www.google.com/maps","Opening Maps");
+ if(/(day|light) mode|bright mode/.test(t)){ setTheme("light"); return say("Day mode"); }
+ if(/(night|dark) mode/.test(t)){ setTheme("dark"); return say("Night mode"); }
+ if(/auto (mode|theme)/.test(t)){ setTheme("auto"); return say("Auto theme"); }
+ if(/reset trip/.test(t)){ $("reset").click(); return say("Trip reset"); }
+ if(/alert (off|disable)/.test(t)){ setLimit(0); return say("Speed alert off"); }
+ if(m = t.match(/alert (?:to |at )?(\d+)/)){ setLimit(+m[1]); return say("Speed alert "+CFG.limit); }
+ if(/(my |current )?speed/.test(t)) return say("You are doing "+Math.round(S.speed)+" kilometres per hour");
+ if(/fuel|mileage|economy/.test(t)) return say(TRIP.dist > .2 ? "Trip average "+(TRIP.fuel/TRIP.dist*100).toFixed(1)+" litres per 100 km" : "Not enough trip data yet");
+ if(/trip|distance/.test(t)) return say("Trip "+TRIP.dist.toFixed(1)+" kilometres");
+ if(/demo mode/.test(t)){ setMode("demo"); return say("Demo mode"); }
+ if(/\bgps\b/.test(t)){ setMode("gps"); return say("GPS mode"); }
+ if(/obd/.test(t)) return say("Tap OBD2 to pick your dongle");
+ if(m = t.match(/(?:go to |open |show )?(home|phone|contacts|media|map|settings)$/)){ go({contacts:"phone",settings:"set"}[m[1]] || m[1]); return say(m[1]); }
+ say("I'm afraid I didn't quite catch that, sir.");
+}
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null, hands = false, once = false;
+function micUI(on){ $("mic").classList.toggle("rec",on); }
+function listen(isHands){
+ if(!SR) return say("Voice needs Chrome (Android or desktop).");
+ try{ rec && rec.stop(); }catch(e){}
+ rec = new SR(); rec.lang = CFG.lang; rec.continuous = !!isHands; rec.interimResults = false;
+ rec.onresult = e => { for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal){ const tx = e.results[i][0].transcript.trim(); if(isHands){ if(/^(hey |ok |okay )?(jarvis|jarvas|travis|service)\b/i.test(tx) || PEND) cmd(tx); } else cmd(tx); } };
+ rec.onstart = () => micUI(true);
+ rec.onend = () => { micUI(hands); if(hands && isHands) setTimeout(() => { if(hands) listen(true); },400); };
+ rec.onerror = e => { if(e.error === "not-allowed" || e.error === "service-not-allowed"){ hands = false; $("handsBtn").classList.remove("on"); $("tVoice").classList.remove("on"); say("Microphone blocked. Allow it and open the page directly in Chrome."); } };
+ try{ rec.start(); }catch(e){}
+}
+function setHands(on){ hands = on; $("handsBtn").classList.toggle("on",on); $("tVoice").classList.toggle("on",on); if(on){ listen(true); say("I've indeed been uploaded, sir. We're online and ready."); } else { try{ rec && rec.stop(); }catch(e){} micUI(false); } }
+
+// ---------- theme + wiring ----------
+function applyTheme(){ let t = CFG.theme; if(t === "auto"){ const h = new Date().getHours(); t = h >= 6 && h < 18 ? "light" : "dark"; } document.documentElement.setAttribute("data-theme",t); $("thBtn").textContent = t === "light" ? "☀" : "☾"; $("autoBtn").classList.toggle("on",CFG.auto); }
+$$("#rail .tab").forEach(b => b.onclick = () => go(b.dataset.p));
+$$("[data-p].tile").forEach(b => b.onclick = () => go(b.dataset.p));
+$$("[data-u]").forEach(b => b.onclick = () => openUrl(b.dataset.u,"Opening "+b.textContent.trim()));
+$$("[data-q]").forEach(b => b.onclick = () => mapsFind(b.dataset.q+" near me"));
+$$("[data-th]").forEach(b => b.onclick = () => setTheme(b.dataset.th));
+NAMES.forEach(n => { const b = document.createElement("button"); b.className = "chip"; b.textContent = n; b.onclick = () => { CFG.prof = n; applyProfile(); save(); }; $("chips").appendChild(b); });
+$("sndBtn").onclick = $("pPlay").onclick = () => started ? stopAudio() : startAudio();
+$("prevS").onclick = $("pPrev").onclick = () => stepProf(-1); $("nextS").onclick = $("pNext").onclick = () => stepProf(1);
+$("vol").oninput = e => setVol(+e.target.value); $("vUp").onclick = () => setVol(CFG.vol+10); $("vDn").onclick = () => setVol(CFG.vol-10);
+$("thBtn").onclick = () => setTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light");
+$("autoBtn").onclick = () => { CFG.auto = !CFG.auto; applyTheme(); save(); };
+$("lUp").onclick = () => setLimit(CFG.limit+10); $("lDn").onclick = () => setLimit(CFG.limit-10);
+$("reset").onclick = () => { TRIP.dist = TRIP.time = TRIP.max = TRIP.fuel = 0; Z.res = null; save(); };
+$("tGps").onclick = () => setMode("gps"); $("tDemo").onclick = () => setMode("demo"); $("tObd").onclick = connectObd; $("tVoice").onclick = () => setHands(!hands); $("handsBtn").onclick = () => setHands(!hands);
+$("mic").onclick = () => listen(false);
+$("cmd").addEventListener("keydown",e => { if(e.key === "Enter" && e.target.value.trim()){ cmd(e.target.value); e.target.value = ""; e.target.blur(); } });
+$("navBtn").onclick = () => $("navIn").value.trim() && mapsDir($("navIn").value.trim()); $("navBtn2").onclick = () => $("navIn2").value.trim() && mapsDir($("navIn2").value.trim());
+$("mYTM").onclick = () => ytm($("mq").value.trim()); $("mYT").onclick = () => yt($("mq").value.trim());
+$("callBtn").onclick = () => { const n = $("num").value.replace(/[^\d+]/g,""); n ? openUrl("tel:"+n,"Calling "+n,true) : say("Enter a number"); };
+$("fadd").onclick = () => { const n = $("fn").value.trim(), t = $("ft").value.trim(); if(n && t){ FAV.push({name:n,tel:t}); $("fn").value = $("ft").value = ""; save(); renderFav(); } };
+$("imp").onclick = async () => {
+ if(!(navigator.contacts && navigator.contacts.select)) return say("Contact picker needs Chrome on Android. Add contacts manually below.");
+ try{ const r = await navigator.contacts.select(["name","tel"],{multiple:true}); r.forEach(c => { if(c.tel && c.tel[0] && FAV.length < 60) FAV.push({name:(c.name && c.name[0]) || c.tel[0],tel:c.tel[0]}); }); save(); renderFav(); }catch(e){}
+};
+$("lang").value = CFG.lang; $("lang").onchange = e => { CFG.lang = e.target.value; save(); if(hands) listen(true); };
+$("speak").checked = CFG.speak; $("speak").onchange = e => { CFG.speak = e.target.checked; save(); };
+$("fs").onclick = () => { try{ document.documentElement.requestFullscreen(); }catch(e){} };
+const ped = $("pedal"); ["pointerdown","touchstart"].forEach(e => ped.addEventListener(e,ev => { ev.preventDefault(); S.pedal = true; })); ["pointerup","pointerleave","touchend","pointercancel"].forEach(e => ped.addEventListener(e,() => S.pedal = false));
+
+let last = performance.now();
+setInterval(() => {
+ const now = performance.now(), dt = Math.max(.01,(now-last)/1000); last = now;
+ if(S.mode === "demo"){ const a = S.pedal ? Math.max(.3,14-S.speed*.09) : -(2+S.speed*.03); S.speed = Math.max(0,Math.min(150,S.speed+a*dt)); }
+ else if(S.mode === "obd") S.speed = O.speed; else if(Date.now()-S.lastFix > 5000 && S.speed > 0) S.speed = Math.max(0,S.speed-20*dt);
+ step(dt); updateAudio();
+},50);
+const tick = () => { try{ $("clock").textContent = new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}); }catch(e){} applyTheme(); };
+setInterval(tick,30000); setInterval(save,5000); tick();
+setVol(CFG.vol); setLimit(CFG.limit); applyProfile(); renderFav(); requestAnimationFrame(frame);
+try{ if(navigator.wakeLock) document.addEventListener("click",() => navigator.wakeLock.request("screen").catch(() => {}),{once:true}); }catch(e){}
+
+// ================= JARVIS additions =================
+if(!Array.isArray(TRIP.route)) TRIP.route = [];
+CFG.tripN = CFG.tripN || 1; CFG.acc = CFG.acc || "cyan"; if(!TRIP.name) TRIP.name = "Trip "+CFG.tripN;
+let TRIPS = [], ROUTES = [];
+try{ TRIPS = JSON.parse(localStorage.getItem("jv.trips")||"[]"); ROUTES = JSON.parse(localStorage.getItem("jv.routes")||"[]"); }catch(e){}
+const saveJ = () => { try{ localStorage.setItem("jv.trips",JSON.stringify(TRIPS)); localStorage.setItem("jv.routes",JSON.stringify(ROUTES)); }catch(e){} };
+const hav = (a,b) => { const r = Math.PI/180, x = (b[0]-a[0])*r, y = (b[1]-a[1])*r, h = Math.sin(x/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(y/2)**2; return 12742000*Math.asin(Math.sqrt(h)); };
+const plen = p => { let d = 0; for(let i=1;i<p.length;i++) d += hav(p[i-1],p[i]); return d/1000; };
+function mkbtn(txt,fn){ const b = document.createElement("button"); b.className = "rb sm"; b.textContent = txt; b.onclick = fn; return b; }
+
+// theme accent (arc blue / gold / Mark red)
+const _applyTheme = applyTheme; applyTheme = function(){ _applyTheme(); document.documentElement.setAttribute("data-acc",CFG.acc); };
+$$("[data-acc]").forEach(b => b.onclick = () => { CFG.acc = b.dataset.acc; applyTheme(); save(); });
+
+// ---------- route preview + Google Maps hand-off ----------
+function prev(pts){
+ if(pts.length < 2) return '<div class="mut">No route points recorded.</div>';
+ let a = 1e9,b = -1e9,c = 1e9,d = -1e9; pts.forEach(p => { a = Math.min(a,p[0]); b = Math.max(b,p[0]); c = Math.min(c,p[1]); d = Math.max(d,p[1]); });
+ const k = Math.cos((a+b)/2*Math.PI/180), w = Math.max((d-c)*k,1e-5), h = Math.max(b-a,1e-5), s = Math.min(280/w,100/h), ox = (300-w*s)/2, oy = (120-h*s)/2;
+ const xy = p => [(ox+(p[1]-c)*k*s).toFixed(1),(oy+(b-p[0])*s).toFixed(1)], poly = pts.map(p => xy(p).join(",")).join(" "), s0 = xy(pts[0]), e0 = xy(pts[pts.length-1]);
+ return `<svg class="map" viewBox="0 0 300 120"><polyline points="${poly}" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${s0[0]}" cy="${s0[1]}" r="5" fill="#35d07f"/><circle cx="${e0[0]}" cy="${e0[1]}" r="5" fill="var(--hot)"/></svg>`;
+}
+function openRoute(pts){
+ if(!pts || pts.length < 2) return say("No route recorded");
+ const f = p => p[0]+","+p[1], n = pts.length, k = Math.min(8,n-2), W = [];
+ for(let i=1;i<=k;i++) W.push(f(pts[Math.round(i*(n-1)/(k+1))]));
+ openUrl("https://www.google.com/maps/dir/?api=1&travelmode=driving&origin="+f(pts[0])+"&destination="+f(pts[n-1])+(W.length ? "&waypoints="+encodeURIComponent(W.join("|")) : ""),"Opening route in Maps");
+}
+function openPlan(r){ openUrl("https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(r.to)+(r.from ? "&origin="+encodeURIComponent(r.from) : ""),"Navigating: "+r.name); }
+
+// ---------- GPS hook: trip route + route recording ----------
+const REC = {on:false,pts:[]};
+function onFix(c,hd){
+ const p = [+c.latitude.toFixed(5),+c.longitude.toFixed(5)], lp = TRIP.route[TRIP.route.length-1];
+ if(S.speed > 2 && (!lp || hav(lp,p) > 20)){ TRIP.route.push(p); if(TRIP.route.length > 800) TRIP.route = TRIP.route.filter((_,i) => i%2 === 0); }
+ if(REC.on){ const l = REC.pts[REC.pts.length-1]; if(!l || hav(l,p) > 10) REC.pts.push(p); }
+}
+
+// ---------- trips ----------
+const openT = {}, openR = {};
+function clearTrip(){ TRIP.dist = TRIP.time = TRIP.max = TRIP.fuel = 0; TRIP.route = []; Z.res = null; }
+function newTrip(){ CFG.tripN++; clearTrip(); TRIP.name = "Trip "+CFG.tripN; $("tripName").value = TRIP.name; save(); }
+function saveTrip(quiet){
+ if(TRIP.dist < .05 && TRIP.time < 10) return say("Nothing to save yet");
+ const n = TRIP.name; TRIPS.unshift({id:Date.now(),name:n,date:new Date().toISOString(),dist:TRIP.dist,time:TRIP.time,max:TRIP.max,fuel:TRIP.fuel,route:TRIP.route.slice()});
+ newTrip(); saveJ(); renderTrips(); if(!quiet) say("The render is complete, sir. "+n+" is saved.");
+}
+function renderTrips(){
+ const el = $("tripList"); el.innerHTML = ""; $("tripName").value = TRIP.name;
+ if(!TRIPS.length){ el.innerHTML = '<div class="mut">No saved trips yet.</div>'; return; }
+ TRIPS.forEach(t => {
+  const w = document.createElement("div"), li = document.createElement("div"); li.className = "li";
+  const x = document.createElement("div"); x.className = "t"; const b = document.createElement("b"); b.textContent = t.name; const s = document.createElement("small");
+  s.textContent = new Date(t.date).toLocaleDateString()+" · "+t.dist.toFixed(1)+" km · "+fmtT(t.time)+" · avg "+(t.time > 5 ? Math.round(t.dist/t.time*3600) : 0)+" km/h · "+t.fuel.toFixed(2)+" L"+(t.dist > .2 ? " · "+(t.fuel/t.dist*100).toFixed(1)+" L/100" : "");
+  x.append(b,s); x.onclick = () => { openT[t.id] = !openT[t.id]; renderTrips(); };
+  li.append(x,mkbtn("🗺",() => openRoute(t.route)),mkbtn("⤳",() => { if(t.route.length < 2) return say("No route recorded"); ROUTES.unshift({id:Date.now(),name:t.name,type:"rec",pts:t.route.slice(),date:t.date}); saveJ(); say("Saved to routes"); }),
+   mkbtn("✎",() => { const n = prompt("Rename trip",t.name); if(n){ t.name = n.trim() || t.name; saveJ(); renderTrips(); } }),mkbtn("✕",() => { TRIPS.splice(TRIPS.indexOf(t),1); saveJ(); renderTrips(); }));
+  w.appendChild(li); if(openT[t.id]){ const pv = document.createElement("div"); pv.className = "pv"; pv.innerHTML = prev(t.route); w.appendChild(pv); } el.appendChild(w);
+ });
+}
+$("reset").onclick = () => { clearTrip(); save(); say("Trip cleared"); };
+$("tripSave").onclick = () => saveTrip(); $("tripNew").onclick = () => { newTrip(); say("Started "+TRIP.name); };
+$("tripName").onchange = e => { TRIP.name = e.target.value.trim() || TRIP.name; e.target.value = TRIP.name; save(); };
+
+// ---------- routes ----------
+function updRec(){
+ $("recBtn").textContent = REC.on ? "■ Stop recording" : "● Start recording"; $("recBtn").classList.toggle("red",REC.on);
+ $("recInfo").textContent = REC.on ? "Recording… "+REC.pts.length+" points · "+plen(REC.pts).toFixed(2)+" km" : (REC.pts.length ? "Stopped · "+REC.pts.length+" points · "+plen(REC.pts).toFixed(2)+" km (not saved)" : "Not recording");
+}
+function startRec(){ REC.on = true; REC.pts = []; updRec(); say("Recording route"); }
+function stopRec(){ REC.on = false; updRec(); say("Recording stopped"); }
+function saveRec(name){
+ if(REC.pts.length < 2) return say("Nothing recorded yet. Start recording and drive.");
+ REC.on = false; const n = (name || $("routeName").value || "").trim() || "Route "+(ROUTES.length+1);
+ ROUTES.unshift({id:Date.now(),name:n,type:"rec",pts:REC.pts.slice(),date:new Date().toISOString()}); REC.pts = []; $("routeName").value = ""; saveJ(); updRec(); renderRoutes(); say("The render is complete, sir. Route "+n+" is saved.");
+}
+function renderRoutes(){
+ const el = $("routeList"); el.innerHTML = ""; if(!ROUTES.length){ el.innerHTML = '<div class="mut">No saved routes yet.</div>'; return; }
+ ROUTES.forEach(r => {
+  const w = document.createElement("div"), li = document.createElement("div"); li.className = "li";
+  const x = document.createElement("div"); x.className = "t"; const b = document.createElement("b"); b.textContent = (r.type === "rec" ? "● " : "→ ")+r.name; const s = document.createElement("small");
+  s.textContent = r.type === "rec" ? plen(r.pts).toFixed(1)+" km · "+r.pts.length+" pts · "+new Date(r.date).toLocaleDateString() : (r.from || "My location")+" → "+r.to;
+  x.append(b,s); x.onclick = () => { openR[r.id] = !openR[r.id]; renderRoutes(); };
+  li.append(x,mkbtn("▶",() => r.type === "rec" ? openRoute(r.pts) : openPlan(r)),mkbtn("✎",() => { const n = prompt("Rename route",r.name); if(n){ r.name = n.trim() || r.name; saveJ(); renderRoutes(); } }),mkbtn("✕",() => { ROUTES.splice(ROUTES.indexOf(r),1); saveJ(); renderRoutes(); }));
+  w.appendChild(li); if(openR[r.id] && r.type === "rec"){ const pv = document.createElement("div"); pv.className = "pv"; pv.innerHTML = prev(r.pts); w.appendChild(pv); } el.appendChild(w);
+ });
+}
+$("recBtn").onclick = () => REC.on ? stopRec() : startRec(); $("recSave").onclick = () => saveRec();
+$("rpAdd").onclick = () => { const to = $("rpTo").value.trim(); if(!to) return say("Enter a destination"); ROUTES.unshift({id:Date.now(),name:$("rpName").value.trim() || "To "+to,type:"plan",from:$("rpFrom").value.trim(),to}); $("rpName").value = $("rpFrom").value = $("rpTo").value = ""; saveJ(); renderRoutes(); say("Route saved"); };
+
+// ---------- date + live labels ----------
+function jtick(){ const d = new Date(); $("bigdate").textContent = d.toLocaleDateString([],{weekday:"long",day:"numeric",month:"long"}).toUpperCase(); $("dayNum").textContent = d.getDate(); $("monName").textContent = d.toLocaleDateString([],{month:"long"}).toUpperCase(); }
+setInterval(jtick,30000); jtick();
+setInterval(() => { $("curTrip").textContent = TRIP.name; if($("trips").classList.contains("on")) $("ctStats").textContent = TRIP.dist.toFixed(1)+" km · "+fmtT(TRIP.time)+" · "+TRIP.fuel.toFixed(2)+" L · "+TRIP.route.length+" route pts"; if(REC.on) updRec(); },1000);
+
+applyTheme(); renderTrips(); renderRoutes(); updRec();
+try{ if("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {}); }catch(e){}
+
+
+// ================= v5: persona, engine FX, music queue/playlists, GPS, navigation =================
+// ---------- JARVIS persona ----------
+const ACKS = ["Right away, sir.","Check.","At your service, sir.","For you, sir, always."];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function flav(m){ return /^(sorry|you |trip|not |tap |add |no |enter|nothing|voice|microphone|i'm|i do|i've|i am|i could|i can|sir|systems|power|working|hostiles|we |welcome|as |the |may i|shall|importing|very well|at your|for you|right away|check|that |there |good|route|engine sound changer|destination|locating)/i.test(m) ? m : pick(ACKS)+" "+m; }
+const sayF = m => { FLAV = true; say(m); FLAV = false; };
+let VOICES = []; if(window.speechSynthesis){ const lv = () => { VOICES = speechSynthesis.getVoices(); }; lv(); speechSynthesis.onvoiceschanged = lv; }
+function jv(u){
+ if(/^en/i.test(CFG.lang)){ const v = VOICES.find(x => /en-GB/i.test(x.lang) && /(male|daniel|oliver|arthur|george)/i.test(x.name)) || VOICES.find(x => /en-GB/i.test(x.lang)) || VOICES.find(x => /^en/i.test(x.lang) && /male/i.test(x.name)); if(v){ u.voice = v; u.lang = v.lang; } }
+ u.pitch = .8; u.rate = .96; u.onstart = () => $("gb").classList.add("talk"); u.onend = u.onerror = () => $("gb").classList.remove("talk");
+}
+function ask(text,yes,no){
+ const p = {yes,no}; PEND = p; setTimeout(() => { if(PEND === p) PEND = null; },15000); say(text);
+ if(!hands) setTimeout(() => { if(PEND === p) listen(false); },3200);
+}
+let lastW = 0, lastBrake = 0, lastBat = 0, drv = 0, drvSaid = 0;
+function jwarn(){ if(Date.now()-lastW > 45000){ lastW = Date.now(); say("I do not believe that is wise, sir."); } }
+setInterval(() => {
+ const n = Date.now();
+ if(S.speed > 120 && CFG.limit === 0) jwarn();
+ if(S.acc < -3.5 && S.speed > 20 && n-lastBrake > 60000){ lastBrake = n; say("Sir, take a deep breath."); }
+ if(S.speed > 5) drv++;
+ if(drv > 0 && drv%7200 === 0 && drvSaid !== drv){ drvSaid = drv; say("May I remind you that you have been driving for "+(drv/3600)+" hours, sir? A short break might be wise."); }
+},1000);
+try{ if(navigator.getBattery) navigator.getBattery().then(b => { const chk = () => { if(b.level < .2 && !b.charging && Date.now()-lastBat > 600000){ lastBat = Date.now(); say("We are losing power, sir. The tablet is at "+Math.round(b.level*100)+" percent. Do plug me in."); } }; setInterval(chk,60000); b.addEventListener("levelchange",chk); }); }catch(e){}
+
+// ---------- engine sound changer on/off ----------
+CFG.eng = CFG.eng !== false;
+const _startAudio = startAudio; startAudio = function(){ if(!CFG.eng) return say("The engine sound changer is switched off, sir."); _startAudio(); };
+function setEng(on,quiet){ CFG.eng = on; if(!on) stopAudio(); $("engSw").checked = on; $("tEng").classList.toggle("on",on); document.body.classList.toggle("noeng",!on); save(); if(!quiet) say(on ? "Engine sound changer online." : "Engine sound changer offline."); }
+$("engSw").onchange = e => setEng(e.target.checked); $("tEng").onclick = () => setEng(!CFG.eng);
+
+// ---------- music: library, playlists, queue ----------
+const au = new Audio(); au.volume = .8; let SONGS = [], Q = [], qi = -1, shuf = false, rep = 0, curUrl = null, PL = [];
+try{ PL = JSON.parse(localStorage.getItem("jv.pl")||"[]"); Q = JSON.parse(localStorage.getItem("jv.q")||"[]"); }catch(e){}
+const savePL = () => { try{ localStorage.setItem("jv.pl",JSON.stringify(PL)); localStorage.setItem("jv.q",JSON.stringify(Q)); }catch(e){} };
+const sById = id => SONGS.find(s => s.id === id), curSong = () => qi >= 0 ? sById(Q[qi]) : null;
+const idb = () => new Promise((res,rej) => { const r = indexedDB.open("jarvis",1); r.onupgradeneeded = () => r.result.createObjectStore("songs",{keyPath:"id",autoIncrement:true}); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function dbAll(){ try{ const d = await idb(); return await new Promise(res => { const q = d.transaction("songs").objectStore("songs").getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => res([]); }); }catch(e){ return []; } }
+async function dbPut(f){ try{ const d = await idb(); await new Promise(res => { const t = d.transaction("songs","readwrite"); t.objectStore("songs").add({name:f.name.replace(/\.[^.]+$/,""),blob:f}); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+async function dbDel(id){ try{ const d = await idb(); await new Promise(res => { const t = d.transaction("songs","readwrite"); t.objectStore("songs").delete(id); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+const fm = s => isFinite(s) ? Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0") : "0:00";
+function mUI(){
+ const pl = !au.paused, s = curSong(), t = s ? s.name : "Nothing playing";
+ ["mPlay","miniPlay"].forEach(i => $(i).textContent = pl ? "❚❚" : "▶"); $("mTitle").textContent = t; $("miniTitle").textContent = s ? t : "No song";
+ $("mShuf").classList.toggle("on",shuf); $("mRep").classList.toggle("on",rep > 0); $("mRep").textContent = rep === 2 ? "①" : "↻";
+}
+function setMeta(){
+ try{ const s = curSong(); if("mediaSession" in navigator && s){ navigator.mediaSession.metadata = new MediaMetadata({title:s.name,artist:"JARVIS · Alto K10"});
+  const h = (a,f) => { try{ navigator.mediaSession.setActionHandler(a,f); }catch(e){} }; h("play",() => au.play()); h("pause",() => au.pause()); h("nexttrack",() => nextSong(1)); h("previoustrack",() => nextSong(-1)); } }catch(e){}
+}
+function playQ(i){
+ if(i < 0 || i >= Q.length) return; const s = sById(Q[i]); if(!s){ Q.splice(i,1); return playQ(Math.min(i,Q.length-1)); }
+ qi = i; if(curUrl) URL.revokeObjectURL(curUrl); curUrl = URL.createObjectURL(s.blob); au.src = curUrl; au.play().catch(() => toast("Tap play to start")); setMeta(); savePL(); renderAll();
+}
+function playLib(id){ Q = SONGS.map(s => s.id); playQ(Q.indexOf(id)); }
+function playList(ids){ ids = ids.filter(sById); if(!ids.length) return say("That playlist is empty, sir."); Q = ids.slice(); playQ(0); }
+function nextSong(d){ if(!Q.length){ Q = SONGS.map(s => s.id); if(!Q.length) return; } playQ(shuf && d > 0 ? Math.floor(Math.random()*Q.length) : (qi+d+Q.length)%Q.length); }
+function enq(id,next){ Q.splice(next && qi >= 0 ? qi+1 : Q.length,0,id); savePL(); renderAll(); }
+function togglePlay(){
+ if(!SONGS.length){ go("music"); return say("Add songs in the Music tab first, sir."); }
+ if(!Q.length){ Q = SONGS.map(s => s.id); return playQ(0); } if(qi < 0 && au.paused) return playQ(0); au.paused ? au.play().catch(() => {}) : au.pause();
+}
+function addToPl(id){
+ const names = PL.map(p => p.name).join(", "), n = prompt("Add to playlist (a new name creates one)"+(names ? "\nExisting: "+names : ""),""); if(!n || !n.trim()) return;
+ let p = PL.find(x => x.name.toLowerCase() === n.trim().toLowerCase()); if(!p){ p = {id:Date.now(),name:n.trim(),ids:[]}; PL.push(p); } if(!p.ids.includes(id)) p.ids.push(id); savePL(); renderAll(); say("Added to "+p.name);
+}
+const plOpen = {};
+function renderSongs(){
+ const el = $("songList"); el.innerHTML = ""; if(!SONGS.length){ el.innerHTML = '<div class="mut">No songs yet. Tap “Add songs” and pick audio files from your phone.</div>'; return; }
+ const cs = curSong();
+ SONGS.forEach((s,i) => {
+  const li = document.createElement("div"); li.className = "li"+(cs && cs.id === s.id ? " on" : ""); const x = document.createElement("div"); x.className = "t"; const b = document.createElement("b"); b.textContent = (i+1)+". "+s.name; x.appendChild(b); x.onclick = () => playLib(s.id);
+  li.append(x,mkbtn("⊕",() => { enq(s.id); say("Added to queue"); }),mkbtn("☰",() => addToPl(s.id)),mkbtn("✕",async () => { await dbDel(s.id); PL.forEach(p => p.ids = p.ids.filter(k => k !== s.id)); Q = Q.filter(k => k !== s.id); if(cs && cs.id === s.id){ au.pause(); qi = -1; } else qi = cs ? Q.indexOf(cs.id) : -1; savePL(); await loadSongs(); })); el.appendChild(li);
+ });
+}
+function renderPL(){
+ const el = $("plList"); el.innerHTML = ""; if(!PL.length){ el.innerHTML = '<div class="mut" style="margin-top:8px">No playlists yet. Create one above, or tap ☰ on a song.</div>'; return; }
+ PL.forEach(p => {
+  const w = document.createElement("div"), li = document.createElement("div"); li.className = "li"; const x = document.createElement("div"); x.className = "t"; const b = document.createElement("b"); b.textContent = "♫ "+p.name; const s = document.createElement("small"); s.textContent = p.ids.filter(sById).length+" songs"; x.append(b,s); x.onclick = () => { plOpen[p.id] = !plOpen[p.id]; renderPL(); };
+  li.append(x,mkbtn("▶",() => playList(p.ids)),mkbtn("✎",() => { const n = prompt("Rename playlist",p.name); if(n && n.trim()){ p.name = n.trim(); savePL(); renderPL(); } }),mkbtn("✕",() => { PL.splice(PL.indexOf(p),1); savePL(); renderPL(); })); w.appendChild(li);
+  if(plOpen[p.id]) p.ids.filter(sById).forEach(id => { const r = document.createElement("div"); r.className = "li"; r.style.paddingLeft = "18px"; const t = document.createElement("div"); t.className = "t"; const bb = document.createElement("b"); bb.textContent = sById(id).name; t.appendChild(bb); t.onclick = () => { Q = p.ids.filter(sById); playQ(Q.indexOf(id)); };
+   r.append(t,mkbtn("⊕",() => { enq(id); say("Added to queue"); }),mkbtn("✕",() => { p.ids = p.ids.filter(k => k !== id); savePL(); renderPL(); })); w.appendChild(r); });
+  el.appendChild(w);
+ });
+}
+function qMove(i,d){ const j = i+d; if(j < 0 || j >= Q.length) return; [Q[i],Q[j]] = [Q[j],Q[i]]; if(qi === i) qi = j; else if(qi === j) qi = i; savePL(); renderQ(); }
+function renderQ(){
+ const el = $("qList"); el.innerHTML = ""; $("qInfo").textContent = Q.length ? Q.length+" in queue"+(qi >= 0 ? " · playing #"+(qi+1) : "") : "Queue is empty";
+ Q.forEach((id,i) => { const s = sById(id); if(!s) return; const li = document.createElement("div"); li.className = "li"+(i === qi ? " on" : ""); const x = document.createElement("div"); x.className = "t"; const b = document.createElement("b"); b.textContent = (i+1)+". "+s.name; x.appendChild(b); x.onclick = () => playQ(i);
+  li.append(x,mkbtn("↑",() => qMove(i,-1)),mkbtn("↓",() => qMove(i,1)),mkbtn("✕",() => { Q.splice(i,1); if(i < qi) qi--; else if(i === qi) qi = -1; savePL(); renderQ(); })); el.appendChild(li); });
+}
+function renderAll(){ renderSongs(); renderPL(); renderQ(); mUI(); }
+async function loadSongs(){ const id = curSong() ? curSong().id : null; SONGS = await dbAll(); Q = Q.filter(sById); qi = id == null ? -1 : Q.indexOf(id); PL.forEach(p => p.ids = p.ids.filter(sById)); renderAll(); }
+function mTab(t){ [["mtLib","mLib"],["mtPl","mPl"],["mtQ","mQ"]].forEach(([b,p],i) => { const on = ["lib","pl","q"][i] === t; $(b).classList.toggle("on",on); $(p).style.display = on ? "" : "none"; }); }
+$("mtLib").onclick = () => mTab("lib"); $("mtPl").onclick = () => mTab("pl"); $("mtQ").onclick = () => mTab("q");
+$("plAdd").onclick = () => { const n = $("plName").value.trim(); if(!n) return; PL.push({id:Date.now(),name:n,ids:[]}); $("plName").value = ""; savePL(); renderPL(); say("Playlist "+n+" created"); };
+$("qClear").onclick = () => { Q = []; qi = -1; savePL(); renderQ(); say("Queue cleared"); };
+$("qSave").onclick = () => { if(!Q.length) return say("The queue is empty, sir."); const n = prompt("Playlist name"); if(n && n.trim()){ PL.push({id:Date.now(),name:n.trim(),ids:Q.slice()}); savePL(); renderPL(); say("Saved as "+n.trim()); } };
+au.onplay = au.onpause = mUI; au.onloadedmetadata = () => $("mDur").textContent = fm(au.duration);
+au.ontimeupdate = () => { if(au.duration) $("mSeek").value = au.currentTime/au.duration*1000; $("mCur").textContent = fm(au.currentTime); };
+au.onended = () => { if(rep === 2) playQ(qi); else if(rep === 1 || shuf || qi < Q.length-1) nextSong(1); else mUI(); };
+$("mSeek").oninput = e => { if(au.duration) au.currentTime = e.target.value/1000*au.duration; };
+$("mVol").oninput = e => au.volume = e.target.value/100;
+$("mPlay").onclick = $("miniPlay").onclick = togglePlay; $("mPrev").onclick = $("miniPrev").onclick = () => nextSong(-1); $("mNext").onclick = $("miniNext").onclick = () => nextSong(1);
+$("mShuf").onclick = () => { shuf = !shuf; mUI(); }; $("mRep").onclick = () => { rep = (rep+1)%3; mUI(); };
+
+$("songFile").onchange = async e => { const fs = [...e.target.files]; for(const f of fs) await dbPut(f); e.target.value = ""; await loadSongs(); say("Added "+fs.length+" song"+(fs.length > 1 ? "s" : "")+", sir."); };
+
+// ---------- GPS (robust) ----------
+let gpsWatch = null, gpsErrs = 0;
+function gpsStat(t,bad){ ["gpsStat","gpsStat2"].forEach(id => { const e = $(id); if(e){ e.textContent = t; e.style.color = bad ? "var(--hot)" : ""; } }); }
+function gpsFix(pos){
+ const c = pos.coords; let v = c.speed; gpsErrs = 0;
+ if((v == null || isNaN(v)) && lastPos) v = hav([lastPos.coords.latitude,lastPos.coords.longitude],[c.latitude,c.longitude])/Math.max(.5,(pos.timestamp-lastPos.timestamp)/1000);
+ lastPos = pos; S.lastFix = Date.now();
+ if(S.mode === "gps"){ let kmh = Math.max(0,(v||0)*3.6); if(kmh > 260) kmh = S.speed; S.speed = kmh < 2 ? 0 : kmh; }
+ const hd = c.heading != null && !isNaN(c.heading) ? c.heading : (TR.length ? TR[TR.length-1].hd : 0), last = TR[TR.length-1];
+ if(!last || Math.abs(last.la-c.latitude)+Math.abs(last.lo-c.longitude) > .00004){ TR.push({la:c.latitude,lo:c.longitude,hd}); if(TR.length > 250) TR.shift(); } else last.hd = hd;
+ $("hdT").textContent = Math.round(hd)+"° "+CARD[Math.round(hd/45)%8]; $("hdA").style.transform = `rotate(${hd}deg)`; $("coord").textContent = c.latitude.toFixed(4)+", "+c.longitude.toFixed(4)+" ±"+Math.round(c.accuracy)+"m";
+ $("mLat").textContent = c.latitude.toFixed(4); $("mLon").textContent = c.longitude.toFixed(4); $("mHd").textContent = Math.round(hd)+"°"; $("mAcc").textContent = Math.round(c.accuracy);
+ gpsStat("GPS locked ±"+Math.round(c.accuracy)+" m"); onFix(c,hd); navTick([c.latitude,c.longitude]); drawMap($("map1")); if($("map").classList.contains("on")) drawMap($("map2"));
+}
+function gpsErr(e){
+ const emb = window.top !== window.self;
+ gpsStat(e.code === 1 ? (emb ? "Location is blocked inside this embedded view. Open the link in Chrome itself (not inside the Claude app) or install the app." : "Location permission denied. In Chrome tap the lock icon → Permissions → Location → Allow, then tap ⟳.") : e.code === 2 ? "Position unavailable. Switch on device Location and try outdoors." : "Waiting for a GPS signal… keep Location switched on.",1);
+ if(e.code !== 1 && gpsErrs++ < 8) setTimeout(startGps,5000);
+}
+function startGps(){
+ if(!("geolocation" in navigator)) return gpsStat("This browser has no GPS support.",1);
+ if(gpsWatch != null){ try{ navigator.geolocation.clearWatch(gpsWatch); }catch(e){} gpsWatch = null; }
+ gpsStat("Requesting GPS…");
+ navigator.geolocation.getCurrentPosition(gpsFix,gpsErr,{enableHighAccuracy:false,timeout:15000,maximumAge:60000});
+ gpsWatch = navigator.geolocation.watchPosition(gpsFix,gpsErr,{enableHighAccuracy:true,maximumAge:1000,timeout:30000});
+ try{ navigator.permissions && navigator.permissions.query({name:"geolocation"}).then(p => { p.onchange = () => { if(p.state === "granted") startGps(); }; }); }catch(e){}
+}
+$("gpsRetry").onclick = $("gpsRetry2").onclick = () => { gpsErrs = 0; startGps(); say("Retrying GPS, sir."); };
+
+// ---------- map (trail + route + destination) ----------
+const BR = (a,b) => { const r = Math.PI/180, dl = (b[1]-a[1])*r, y = Math.sin(dl)*Math.cos(b[0]*r), x = Math.cos(a[0]*r)*Math.sin(b[0]*r)-Math.sin(a[0]*r)*Math.cos(b[0]*r)*Math.cos(dl); return (Math.atan2(y,x)*180/Math.PI+360)%360; };
+function drawMap(svg){
+ if(!svg) return; let h = '<g stroke="var(--line)" stroke-width="1">'; for(let i=0;i<=300;i+=50) h += `<line x1="${i}" y1="0" x2="${i}" y2="220"/>`; for(let j=0;j<=220;j+=55) h += `<line x1="0" y1="${j}" x2="300" y2="${j}"/>`; h += "</g>";
+ const cc = lastPos ? [lastPos.coords.latitude,lastPos.coords.longitude] : (TR.length ? [TR[TR.length-1].la,TR[TR.length-1].lo] : null);
+ if(!cc){ svg.innerHTML = h+'<text x="150" y="115" text-anchor="middle" fill="var(--mut)" font-size="14">Waiting for GPS…</text>'; return; }
+ const k = Math.cos(cc[0]*Math.PI/180), rel = p => [(p[1]-cc[1])*111320*k,-(p[0]-cc[0])*110540], hd = TR.length ? TR[TR.length-1].hd : 0;
+ const tp = TR.map(p => rel([p.la,p.lo])); let ext = 120, rp = [];
+ if(NAV.on && NAV.pts.length){ let a = 0, md = 1e9; NAV.pts.forEach((p,i) => { const d = hav(cc,p); if(d < md){ md = d; a = i; } }); let cum = 0; for(let i=a;i<NAV.pts.length && cum < 700;i++){ if(i > a) cum += hav(NAV.pts[i-1],NAV.pts[i]); rp.push(rel(NAV.pts[i])); } rp.forEach(p => ext = Math.max(ext,Math.abs(p[0])*1.15,Math.abs(p[1])*1.5)); }
+ else { tp.forEach(p => ext = Math.max(ext,Math.abs(p[0])*1.2,Math.abs(p[1])*1.6)); }
+ const sc = 100/ext, X = p => (150+p[0]*sc).toFixed(1), Y = p => (110+p[1]*sc).toFixed(1), pl = a => a.map(p => X(p)+","+Y(p)).join(" ");
+ if(tp.length > 1) h += `<polyline points="${pl(tp)}" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`;
+ if(rp.length > 1) h += `<polyline points="${pl(rp)}" fill="none" stroke="var(--hot)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+ if(NAV.on && NAV.dest){ const d = rel(NAV.dest); if(rp.length){ h += `<g transform="translate(${X(d)} ${Y(d)})"><circle r="7" fill="var(--hot)" opacity=".9"/><text y="3" text-anchor="middle" font-size="9" fill="#fff">⚑</text></g>`; } else { const b = BR(cc,NAV.dest)*Math.PI/180; h += `<line x1="150" y1="110" x2="${(150+Math.sin(b)*85).toFixed(1)}" y2="${(110-Math.cos(b)*85).toFixed(1)}" stroke="var(--hot)" stroke-width="3" stroke-dasharray="6 5"/><circle cx="${(150+Math.sin(b)*85).toFixed(1)}" cy="${(110-Math.cos(b)*85).toFixed(1)}" r="6" fill="var(--hot)"/>`; } }
+ h += `<g transform="translate(150 110) rotate(${hd})"><circle r="14" fill="var(--acc)" opacity=".2"/><path d="M0-10L7 8L0 4L-7 8Z" fill="var(--acc)"/></g>`; svg.innerHTML = h;
+}
+
+// ---------- in-app destination directions (OSM geocoding + OSRM routing; needs internet) ----------
+const NAV = {on:false,dest:null,name:"",pts:[],steps:[],i:0,dist:0,dur:0,said:{},lastRe:0,wait:false};
+const ARW = {"uturn":"↶","sharp left":"↙","left":"←","slight left":"↖","straight":"↑","slight right":"↗","right":"→","sharp right":"↘"};
+function instr(s){
+ const mn = s.maneuver || {}, t = mn.type, mo = mn.modifier || "", nm = s.name || "";
+ if(t === "depart") return "Head out"+(nm ? " on "+nm : ""); if(t === "arrive") return "You have arrived at your destination";
+ if(/roundabout|rotary/.test(t)) return "Take the roundabout, exit "+(mn.exit || "ahead")+(nm ? " onto "+nm : ""); if(mo === "uturn") return "Make a U-turn";
+ if(t === "continue" || mo === "straight") return "Continue straight"+(nm ? " on "+nm : ""); if(t === "fork") return "Keep "+(mo.indexOf("left") >= 0 ? "left" : "right")+" at the fork";
+ return "Turn "+(mo || "ahead")+(nm ? " onto "+nm : "");
+}
+const fmD = m => m < 1000 ? Math.max(10,Math.round(m/10)*10)+" m" : (m/1000).toFixed(1)+" km";
+function navShow(show,a,d,t,r){ $$(".nvBox").forEach(b => b.style.display = show ? "" : "none"); if(!show) return; $$(".nvA").forEach(e => e.textContent = a); $$(".nvD").forEach(e => e.textContent = d); $$(".nvT").forEach(e => e.textContent = t); $$(".nvR").forEach(e => e.textContent = r); }
+async function navFetch(from,to){
+ const j = await (await fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson&steps=true`)).json();
+ if(!j.routes || !j.routes[0]) throw new Error("noroute"); const r = j.routes[0];
+ NAV.pts = r.geometry.coordinates.map(c => [c[1],c[0]]); NAV.steps = r.legs[0].steps; NAV.dist = r.distance; NAV.dur = r.duration; NAV.i = Math.min(1,NAV.steps.length-1); NAV.said = {};
+}
+async function navTo(q){
+ q = (q || "").trim(); if(!q) return; const cm = q.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/); let d = null; say("Locating "+q+", sir.");
+ try{
+  if(cm){ d = [+cm[1],+cm[2]]; NAV.name = q; }
+  else { const j = await (await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q))).json(); if(!j[0]) return say("I could not find "+q+", sir."); d = [+j[0].lat,+j[0].lon]; NAV.name = j[0].display_name.split(",")[0]; }
+ }catch(e){ say("I cannot reach the routing service from this view, sir. Opening Google Maps."); return mapsDir(q); }
+ NAV.on = true; NAV.dest = d; NAV.pts = []; NAV.steps = []; NAV.i = 0; NAV.said = {}; NAV.wait = false;
+ if(!lastPos){ NAV.wait = true; navShow(true,"⌖","–","Waiting for GPS to plot the route to "+NAV.name,""); return say("Destination set, sir. Waiting for GPS to plot the route."); }
+ await navPlot([lastPos.coords.latitude,lastPos.coords.longitude]);
+}
+async function navPlot(here){
+ try{ await navFetch(here,NAV.dest); say("Route plotted, sir. "+(NAV.dist/1000).toFixed(1)+" kilometres, about "+Math.round(NAV.dur/60)+" minutes."); }
+ catch(e){ NAV.pts = []; NAV.steps = []; say("I could not plot a road route, sir. Showing a straight-line heading."); }
+ navTick(here); drawMap($("map1")); if($("map").classList.contains("on")) drawMap($("map2"));
+}
+function navStop(quiet){ NAV.on = false; NAV.pts = []; NAV.steps = []; navShow(false); drawMap($("map1")); if(!quiet) say("Navigation cancelled, sir."); }
+function navTick(here){
+ if(!NAV.on) return; if(NAV.wait){ NAV.wait = false; navPlot(here); return; }
+ const dd = hav(here,NAV.dest);
+ if(dd < 35){ const home = /home/i.test(NAV.name); navStop(true); say(home ? "Welcome home, sir." : "We have arrived, sir. As always, a great pleasure watching you work."); setTimeout(() => marvel("end"),7000); return; }
+ const hd = TR.length ? TR[TR.length-1].hd : 0;
+ if(!NAV.steps.length){ const rel = (BR(here,NAV.dest)-hd+360)%360; return navShow(true,["↑","↗","→","↘","↓","↙","←","↖"][Math.round(rel/45)%8],fmD(dd),"Straight line to "+NAV.name,"No road route available"); }
+ let md = 1e9; for(const q of NAV.pts){ const d = hav(here,q); if(d < md) md = d; }
+ if(md > 90 && Date.now()-NAV.lastRe > 15000){ NAV.lastRe = Date.now(); say("Recalculating, sir."); navFetch(here,NAV.dest).catch(() => {}); }
+ const loc = s => [s.maneuver.location[1],s.maneuver.location[0]]; let st = NAV.steps[NAV.i], dm = hav(here,loc(st));
+ while(NAV.i < NAV.steps.length-1 && dm < 30){ NAV.i++; st = NAV.steps[NAV.i]; dm = hav(here,loc(st)); NAV.said = {}; }
+ const txt = instr(st);
+ if(dm < 350 && dm > 120 && !NAV.said.far){ NAV.said.far = 1; say("In "+fmD(dm)+", "+txt.toLowerCase()+"."); }
+ if(dm < 80 && !NAV.said.near){ NAV.said.near = 1; say(txt+" now."); }
+ let rem = dm; for(let k=NAV.i;k<NAV.steps.length;k++) rem += NAV.steps[k].distance;
+ const eta = new Date(Date.now()+NAV.dur*(rem/Math.max(1,NAV.dist))*1000).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+ navShow(true,(st.maneuver.type === "arrive") ? "⚑" : (ARW[st.maneuver.modifier] || "↑"),fmD(dm),txt,(rem/1000).toFixed(1)+" km to "+NAV.name+" · ETA "+eta);
+}
+$$(".nvStop").forEach(b => b.onclick = () => navStop());
+$("navBtn").onclick = () => navTo($("navIn").value); $("navBtn2").onclick = () => navTo($("navIn2").value);
+[["navIn","navBtn"],["navIn2","navBtn2"]].forEach(([i,b]) => $(i).addEventListener("keydown",e => { if(e.key === "Enter") $(b).click(); }));
+$("navGM").onclick = () => { const q = ($("navIn").value || NAV.name || "").trim(); q ? mapsDir(q) : say("Enter a destination first, sir."); };
+
+// ---------- arc-reactor speed segments ----------
+const SEG = [];
+(function(){ const g = $("segs"), ns = "http://www.w3.org/2000/svg", n = 12, r1 = 152, r2 = 204;
+ for(let i=0;i<n;i++){ const a0 = (135+i*22.5+1.8)*Math.PI/180, a1 = (135+(i+1)*22.5-1.8)*Math.PI/180, P = (r,a) => (250+r*Math.cos(a)).toFixed(1)+","+(250+r*Math.sin(a)).toFixed(1);
+  const p = document.createElementNS(ns,"polygon"); p.setAttribute("points",[P(r2,a0),P(r2,a1),P(r1,a1-.03),P(r1,a0+.03)].join(" ")); p.style.stroke = "var(--line)"; p.style.strokeWidth = "1.4"; p.style.fill = "var(--acc)"; p.style.fillOpacity = ".08"; g.appendChild(p); SEG.push(p); } })();
+function segLoop(){
+ const f = D.s/160*12; SEG.forEach((p,i) => { const l = Math.max(0,Math.min(1,f-i)), red = i >= 9, on = l > .5; p.style.fill = red ? "var(--hot)" : "var(--acc)"; p.style.fillOpacity = (.08+.92*l).toFixed(2);
+  if(p._on !== on){ p._on = on; p.style.filter = on ? `drop-shadow(0 0 7px ${red ? "var(--hot)" : "var(--acc)"})` : "none"; } });
+ requestAnimationFrame(segLoop);
+}
+
+// ---------- JARVIS voice brain ----------
+const cmd0b = cmd0, PAGES = {home:"home",drive:"home",phone:"phone",contacts:"phone",media:"media",map:"map",settings:"set",music:"music",player:"music",trip:"trips",trips:"trips",route:"routes",routes:"routes",queue:"music",playlist:"music",playlists:"music"};
+function cmd(raw){
+ const t = raw.toLowerCase().replace(/[.,!?]/g,"").replace(WAKE,"").trim(); let m;
+ if(PEND){ const p = PEND; PEND = null; if(/^(yes|yeah|yep|sure|please|do it|go ahead|affirmative|confirm|okay|ok|store it|call)\b/.test(t)) return p.yes(); if(/^(no|nope|nah|negative|cancel|never mind|don't|do not)\b/.test(t)) return p.no(); }
+ if(!t) return say(pick(["At your service, sir.","For you, sir, always.","Yes, sir?"]));
+ if(extraCmd(t)) return;
+ // personality
+ if(/^(hello|hi|hey|good (morning|afternoon|evening)|are you (there|awake|online|up)|wake up|you there)\b/.test(t)) return say(pick(["At your service, sir.","Good to see you, sir. At your service."]));
+ if(/(daddy'?s home|i'?m home|i am home|welcome home|honey i'?m home)/.test(t)) return say("Welcome home, sir.");
+ if(/\b(thank|thanks|good job|well done|nice work|great job)\b/.test(t)) return say("For you, sir, always.");
+ if(/(status|diagnostic|system check|systems check|how are you|report)/.test(t)){ const gp = S.lastFix && Date.now()-S.lastFix < 8000 ? "GPS is locked" : "GPS is searching"; return say("Systems are at full capacity, sir. Speed "+Math.round(S.speed)+" kilometres per hour, engine at "+Math.round(S.rpm/10)*10+" revolutions, "+gp+". Trip "+TRIP.dist.toFixed(1)+" kilometres."); }
+ if(/(full power|max(imum)? power|power level|overdrive|all the power|all power)/.test(t)) return say("Power at 400% capacity.");
+ if(/\b(fly|flight|take ?off|suit up)\b/.test(t)) return say("Sir, there are still terabytes of calculations needed before an actual flight is possible.");
+ if(/secret project|classified|top secret/.test(t)) return say("Working on a secret project, are we, sir?");
+ if(/(tired|sleepy|exhausted|how long.*awake|been awake|should i sleep)/.test(t)) return say("May I remind you that you have been awake for nearly 72 hours?");
+ if(/(deep breath|calm me|calm down|stressed|panic|road rage|i'?m angry)/.test(t)) return say("Sir, take a deep breath.");
+ if(/(import|load|restore|sync).*(preferences|settings)/.test(t)){ say("Importing all preferences from home interface."); return void setTimeout(() => { applyTheme(); applyProfile(); setVol(CFG.vol); say("The render is complete."); },3500); }
+ if(/(red alert|hostile|under attack|being (followed|chased)|someone is following|intruder|threat)/.test(t)) return ask("Hostiles inbound, sir. Shall I call 112?",() => openUrl("tel:112","Calling emergency services",true),() => say("Very well, sir. I shall remain vigilant."));
+ if(/(who are you|what are you|your name)/.test(t)) return say("I am JARVIS, sir. Just A Rather Very Intelligent System. Currently installed in a rather modest hatchback.");
+ if(/what('?s| is) the time|what time/.test(t)) return say("It is "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+", sir.");
+ if(/\bjoke\b|something funny/.test(t)) return say(pick(["I would, sir, but my humour module is licensed for sarcasm only.","The Alto has a top speed that I am contractually obliged not to comment on, sir.","I could tell you a joke about the fuel gauge, sir, but it would run on empty."]));
+ // engine FX
+ if(/(enable|turn on|activate|switch on|start).*(sound changer|engine fx|engine effects|engine mod)/.test(t)) return setEng(true);
+ if(/(disable|turn off|deactivate|switch off|stop).*(sound changer|engine fx|engine effects|engine mod)/.test(t)) return setEng(false);
+ if(/(max|full) volume|volume (max|full)/.test(t)){ setVol(100); return say("I do not believe that is wise, sir. But very well. Volume at maximum."); }
+ if(/alert (off|disable)|disable.*alert/.test(t)){ setLimit(0); return say("Speed alert disabled. I do not believe that is wise, sir."); }
+ // pages
+ if(m = t.match(/^(?:go to|open|show|switch to)(?: the| my)? (home|drive|phone|contacts|media|map|settings|music|player|trips?|routes?|queue|playlists?)$/)){ const k = m[1]; go(PAGES[k]); if(PAGES[k] === "music") mTab(/queue/.test(k) ? "q" : /playlist/.test(k) ? "pl" : "lib"); return sayF("Opening "+k); }
+ // navigation
+ if(m = t.match(/(?:navigate|take me|directions?|drive|go) to (.+)/)){ FLAV = true; navTo(m[1]); FLAV = false; return; }
+ if(/(stop|cancel|end|exit) (the )?(navigation|directions|route guidance|guidance)/.test(t)) return navStop();
+ if(/(how far|eta|when (will|do) i arrive|distance to)/.test(t)) return say(NAV.on ? ($$(".nvR")[0].textContent || "Calculating, sir.") : "No destination is set, sir.");
+ // music, queue, playlists
+ if(/(next|skip).*(song|track)|^skip$/.test(t)){ nextSong(1); return sayF("Next song"); }
+ if(/(previous|last|back).*(song|track)/.test(t)){ nextSong(-1); return sayF("Previous song"); }
+ if(/(pause|stop).*(music|song|player)|^pause$/.test(t) && !/youtube|yt/.test(t)){ au.pause(); return sayF("Paused"); }
+ if(/(what('?s| is) (this|playing)|which song|current song)/.test(t)){ const s = curSong(); return say(s ? "This is "+s.name+", sir." : "Nothing is playing, sir."); }
+ if(/clear (the |my )?queue/.test(t)){ $("qClear").click(); return; }
+ if(/(show|open) (the |my )?queue/.test(t)){ go("music"); mTab("q"); return sayF("Opening the queue"); }
+ if(m = t.match(/^(?:add |queue )(.+?)(?: to (?:the |my )?queue)?$/)){ const q = m[1], s = SONGS.find(x => x.name.toLowerCase().includes(q)); if(s){ enq(s.id); return sayF(s.name+" added to the queue"); } }
+ if(m = t.match(/^play (.+?) next$/)){ const s = SONGS.find(x => x.name.toLowerCase().includes(m[1])); if(s){ enq(s.id,true); return sayF(s.name+" is up next"); } }
+ if(m = t.match(/^play (?:my |the )?(?:playlist )?(.+?)(?: playlist)?$/)){ const p = PL.find(x => /playlist/.test(t) && t.includes(x.name.toLowerCase())) || PL.find(x => x.name.toLowerCase() === m[1]); if(p){ playList(p.ids); return sayF("Playing playlist "+p.name); } }
+ if((/(play|resume|start).*(my |the )?(music|songs|player)|^resume$/.test(t)) && !/youtube|yt|sound/.test(t)){ if(!SONGS.length){ go("music"); return say("Add songs in the Music tab first, sir."); } if(qi < 0 && au.paused) Q.length ? playQ(0) : togglePlay(); else au.play().catch(() => {}); return sayF("Playing music"); }
+ if(/shuffle/.test(t)){ shuf = !/off/.test(t); mUI(); return sayF("Shuffle "+(shuf ? "on" : "off")); }
+ if(m = t.match(/^play (.+)/)){ if(playIntent(m[1])) return; }
+ // trips & routes
+ if(/(save|finish|end) (this )?trip/.test(t)){ if(TRIP.dist < .05 && TRIP.time < 10) return say("There is nothing to store yet, sir."); return ask("Shall I store this on the Stark Industries central database?",() => { saveTrip(true); say("The render is complete. As always, sir, a great pleasure watching you work."); },() => say(pick(["Very well, sir. I shall file it under regrettable decisions.","As you wish, sir. I shall simply pretend it never happened."]))); }
+ if(/(new|start|begin) (a )?trip/.test(t)){ newTrip(); return sayF("Started "+TRIP.name); }
+ if(m = t.match(/(?:name|rename|call) (?:this |the |current )?trip (?:to |as )?(.+)/)){ TRIP.name = m[1].replace(/\b\w/g,c => c.toUpperCase()); $("tripName").value = TRIP.name; save(); return sayF("Trip named "+TRIP.name); }
+ if(/(start|begin).*(recording|route)/.test(t)){ startRec(); return say("Right away, sir. Working on a secret project, are we, sir?"); }
+ if(m = t.match(/save (?:this )?route(?: as (.+))?/)) return saveRec(m[1]);
+ if(/(stop|end).*(recording|route)/.test(t)){ if(REC.pts.length > 1) saveRec(); else stopRec(); return; }
+ FLAV = true; cmd0b(t); FLAV = false;
+}
+function onPage(p){ if(p === "trips") renderTrips(); if(p === "routes"){ renderRoutes(); updRec(); } if(p === "music") renderAll(); if(p === "map") drawMap($("map2")); }
+
+// ---------- start-up ----------
+if(!CFG.v5){ CFG.v5 = 1; CFG.theme = "dark"; save(); }
+setEng(CFG.eng,true); applyTheme(); renderTrips(); renderRoutes(); updRec(); loadSongs(); startGps(); requestAnimationFrame(segLoop);
+
+
+// ================= v6 =================
+let lastAct = Date.now(), userActed = false; document.addEventListener("pointerdown",() => { userActed = true; lastAct = Date.now(); },{passive:true});
+const heardSet = tx => { lastAct = Date.now(); try{ $("cmd").placeholder = "Heard: "+tx; }catch(e){} };
+
+// ---------- JARVIS voice: male British preference, picker, tuning ----------
+function pickVoice(){
+ if(!/^en/i.test(CFG.lang)) return null; const V = VOICES;
+ if(CFG.voice){ const v = V.find(x => x.voiceURI === CFG.voice || x.name === CFG.voice); if(v) return v; }
+ const score = x => { const n = (x.name+" "+x.voiceURI).toLowerCase(), l = x.lang.toLowerCase().replace("_","-"); let s = 0;
+  if(l === "en-gb" || /united kingdom|british/.test(n)) s += 5; if(/\bmale\b/.test(n) && !/female/.test(n)) s += 6; if(/(daniel|oliver|arthur|george|james|malcolm|ryan|rishi|thomas)/.test(n)) s += 4;
+  if(/en-gb-x-(gbb|gbd|rjs)/.test(n)) s += 6; if(/female|(susan|hazel|libby|sonia|kate|serena|fiona|samantha|karen|moira|victoria)/.test(n)) s -= 8; if(/^en/.test(l)) s += 1; return s; };
+ return V.slice().sort((a,b) => score(b)-score(a))[0] || null;
+}
+function jv(u){
+ const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; } const nv = NEXTV; NEXTV = null; u.pitch = nv ? nv[0] : (CFG.vp || .78); u.rate = nv ? nv[1] : (CFG.vr || .94);
+ u.onstart = () => $("gb").classList.add("talk"); u.onend = u.onerror = () => $("gb").classList.remove("talk");
+}
+function sayQ(text,p){ NEXTV = p || null; say(text); NEXTV = null; }
+function fillVoices(){
+ const sel = $("voiceSel"); if(!sel) return; sel.innerHTML = '<option value="">Auto (British male if available)</option>';
+ VOICES.filter(v => /^en/i.test(v.lang)).forEach(v => { const o = document.createElement("option"); o.value = v.voiceURI; o.textContent = v.name+" ("+v.lang+")"; sel.appendChild(o); }); sel.value = CFG.voice || "";
+}
+if(window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { VOICES = speechSynthesis.getVoices(); fillVoices(); };
+$("voiceSel").onchange = e => { CFG.voice = e.target.value; save(); };
+$("vPitch").value = Math.round((CFG.vp || .78)*100); $("vRate").value = Math.round((CFG.vr || .94)*100);
+$("vPitch").oninput = e => { CFG.vp = e.target.value/100; save(); }; $("vRate").oninput = e => { CFG.vr = e.target.value/100; save(); };
+$("vTest").onclick = () => say("Good evening, sir. All systems are online and ready.");
+$("wakeSw").checked = !CFG.noWake; $("wakeSw").onchange = e => { CFG.noWake = !e.target.checked; save(); };
+$("idleSw").checked = CFG.idleQ !== false; $("idleSw").onchange = e => { CFG.idleQ = e.target.checked; save(); };
+
+// ---------- faster, more tolerant speech recognition ----------
+function pickAlt(r){ for(let i=0;i<r.length;i++) if(WAKE.test(r[i].transcript.trim())) return r[i].transcript.trim(); return r[0].transcript.trim(); }
+function listen(isHands){
+ if(!SR) return say("Voice needs Chrome (Android or desktop).");
+ try{ if(rec){ rec.onend = null; rec.stop(); } }catch(e){}
+ rec = new SR(); rec.lang = CFG.lang; rec.continuous = !!isHands; rec.interimResults = true; rec.maxAlternatives = 4;
+ const ran = {}; let timer = null;
+ const run = (i,tx) => { if(!tx || ran[i]) return; ran[i] = 1; if(isHands && !CFG.noWake){ if(WAKE.test(tx) || PEND) cmd(tx); } else cmd(tx); };
+ rec.onresult = e => { for(let k=e.resultIndex;k<e.results.length;k++){ const r = e.results[k], tx = pickAlt(r); heardSet(tx); clearTimeout(timer); if(r.isFinal) run(k,tx); else timer = setTimeout(() => run(k,tx),750); } };
+ rec.onstart = () => micUI(true);
+ rec.onend = () => { micUI(hands); if(hands && isHands) setTimeout(() => { if(hands) listen(true); },120); };
+ rec.onerror = e => { if(e.error === "not-allowed" || e.error === "service-not-allowed"){ hands = false; $("handsBtn").classList.remove("on"); $("tVoice").classList.remove("on"); say("Microphone blocked. Allow it and open the page directly in Chrome."); } };
+ try{ rec.start(); }catch(e){}
+}
+
+// ---------- music: "play …" stays in the built-in player; add-songs fixed ----------
+const words = s => s.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(Boolean);
+function findSong(q){ const w = words(q); if(!w.length) return null; let best = null, bs = 0; SONGS.forEach(s => { const n = words(s.name).join(" "); let sc = 0; w.forEach(x => { if(n.includes(x)) sc++; }); if(n.includes(w.join(" "))) sc += 2; if(sc > bs){ bs = sc; best = s; } }); return bs >= Math.max(1,Math.ceil(w.length*.6)) ? best : null; }
+function playIntent(raw){
+ let q = raw.trim(); if(/ on (youtube music|yt music|youtube|you tube|music app)$/.test(q) || /^(youtube|yt) /.test(q)) return false; q = q.replace(/ on (my music|the player|jarvis|the music player)$/,"");
+ if(/^(some |any |my )?(music|songs?|something|anything|a song|tracks?|random|shuffle.*)$/.test(q)){
+  if(!SONGS.length){ go("music"); say("Your library is empty, sir. Tap Add songs and pick files from your phone."); return true; }
+  if(/shuffle/.test(q)){ shuf = true; mUI(); } if(qi < 0 && au.paused) (Q.length ? playQ(0) : togglePlay()); else au.play().catch(() => {}); sayF("Playing music"); return true; }
+ const s = findSong(q); if(s){ playLib(s.id); sayF("Playing "+s.name); return true; }
+ if(!SONGS.length) go("music");
+ ask((SONGS.length ? "I could not find "+q+" in your library, sir." : "Your library is empty, sir.")+" Shall I search YouTube Music?",() => ytm(q),() => say("Very well, sir.")); return true;
+}
+const EXT = {"audio/mpeg":"mp3","audio/mp3":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/aac":"aac","audio/wav":"wav","audio/x-wav":"wav","audio/ogg":"ogg","audio/flac":"flac","audio/webm":"webm"}, MIME = {mp3:"audio/mpeg",m4a:"audio/mp4",aac:"audio/aac",wav:"audio/wav",ogg:"audio/ogg",flac:"audio/flac",webm:"audio/webm",opus:"audio/ogg"};
+async function dbAll(){ let a = []; try{ const d = await idb(); a = await new Promise(res => { const q = d.transaction("songs").objectStore("songs").getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => res([]); }); }catch(e){} return a.concat(MEM); }
+async function dbPut(f){
+ try{ const d = await idb(); await new Promise((res,rej) => { const t = d.transaction("songs","readwrite"); t.objectStore("songs").add({name:f.name.replace(/\.[^.]+$/,""),blob:f}); t.oncomplete = res; t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); }); return true; }
+ catch(e){ MEM.push({id:-(++memId),name:f.name.replace(/\.[^.]+$/,""),blob:f}); return false; }
+}
+async function dbDel(id){ if(id < 0){ MEM = MEM.filter(s => s.id !== id); return; } try{ const d = await idb(); await new Promise(res => { const t = d.transaction("songs","readwrite"); t.objectStore("songs").delete(id); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+$("addSongs").onclick = null;
+$("songFile").onchange = async e => { const fs = [...e.target.files]; let mem = 0; for(const f of fs) if(!(await dbPut(f))) mem++; e.target.value = ""; await loadSongs(); say("Added "+fs.length+" song"+(fs.length > 1 ? "s" : "")+", sir."+(mem ? " Storage is blocked in this view, so they last until you close it. Open the installed app to keep them." : "")); };
+
+// ---------- weather (Open-Meteo, needs internet) ----------
+const WX = {}; try{ Object.assign(WX,JSON.parse(localStorage.getItem("jv.wx")||"{}")); }catch(e){} let wxTry = 0;
+function wxInfo(c,day){ if(c === 0) return {k:day ? "sun" : "moon",t:day ? "Sunny" : "Clear night"}; if(c <= 2) return {k:"part",t:"Partly cloudy"}; if(c === 3) return {k:"cloud",t:"Overcast"}; if(c === 45 || c === 48) return {k:"fog",t:"Foggy"}; if(c >= 51 && c <= 57) return {k:"rain",t:"Drizzle"}; if(c >= 61 && c <= 67) return {k:"rain",t:"Rainy"}; if((c >= 71 && c <= 77) || c === 85 || c === 86) return {k:"snow",t:"Snowy"}; if(c >= 80 && c <= 82) return {k:"rain",t:"Showers"}; if(c >= 95) return {k:"storm",t:"Thunderstorm"}; return {k:"cloud",t:"Cloudy"}; }
+function wxSvg(k){
+ const sun = '<g class="ray"><circle cx="30" cy="30" r="9" fill="var(--acc)"/>'+[0,45,90,135,180,225,270,315].map(a => `<line x1="30" y1="14" x2="30" y2="8" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round" transform="rotate(${a} 30 30)"/>`).join("")+'</g>';
+ const cl = '<g class="cl"><path d="M12 38a8 8 0 0 1 2-15a11 11 0 0 1 21-2a9 9 0 0 1 3 17z" fill="var(--bg)" stroke="var(--acc)" stroke-width="2.2"/></g>';
+ const dr = [18,28,38].map(x => `<line class="dr" x1="${x}" y1="42" x2="${x-2}" y2="50" stroke="var(--hot)" stroke-width="2.5" stroke-linecap="round"/>`).join("");
+ let g = ""; if(k === "sun") g = sun; else if(k === "moon") g = '<path d="M38 10a17 17 0 1 0 13 26a14 14 0 0 1-13-26z" fill="var(--acc)"/><circle class="tw" cx="12" cy="14" r="1.6" fill="var(--tx)"/><circle class="tw" cx="22" cy="7" r="1.1" fill="var(--tx)"/>';
+ else if(k === "part") g = '<g transform="translate(-6 -6) scale(.8)">'+sun+'</g>'+cl; else if(k === "cloud") g = cl; else if(k === "fog") g = cl+'<g stroke="var(--acc)" stroke-width="2.2" stroke-linecap="round"><line class="tw" x1="14" y1="45" x2="42" y2="45"/><line class="tw" x1="18" y1="51" x2="46" y2="51"/></g>';
+ else if(k === "rain") g = cl+dr; else if(k === "storm") g = cl+'<path class="bolt" d="M30 36l-7 11h6l-3 9l11-13h-6z" fill="var(--hot)"/>'; else g = cl+[18,28,38].map(x => `<circle class="dr" cx="${x}" cy="45" r="2.2" fill="var(--tx)"/>`).join("");
+ return '<svg viewBox="0 0 60 60">'+g+'</svg>';
+}
+function wxShow(){
+ if(WX.t == null){ $("wxC").textContent = "Weather unavailable"; $("wxS").textContent = WX.err ? "Weather needs internet and works in the installed app, not the preview." : "Waiting for GPS…"; return; }
+ const i = wxInfo(WX.code,WX.day), svg = wxSvg(i.k), tm = new Date(WX.at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+ $("wxIcon").innerHTML = svg; $("wxT").textContent = Math.round(WX.t)+"°C"; $("wxC").textContent = i.t; $("wxH").textContent = Math.round(WX.h)+"%"; $("wxW").textContent = Math.round(WX.w); $("wxF").textContent = Math.round(WX.f)+"°"; $("wxR").textContent = WX.rain == null ? "–" : WX.rain;
+ $("wxS").textContent = WX.err ? "Offline. Showing the update from "+tm : "Updated "+tm; $("wxChip").innerHTML = '<span class="wxi">'+svg+'</span>'+Math.round(WX.t)+'° <small>'+Math.round(WX.h)+'% · '+i.t+'</small>';
+}
+async function wxFetch(){
+ if(!lastPos) return; wxTry = Date.now();
+ try{ const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lastPos.coords.latitude.toFixed(3)}&longitude=${lastPos.coords.longitude.toFixed(3)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&daily=precipitation_probability_max&timezone=auto&forecast_days=1`)).json(); const c = j.current;
+  Object.assign(WX,{t:c.temperature_2m,h:c.relative_humidity_2m,f:c.apparent_temperature,w:c.wind_speed_10m,code:c.weather_code,day:c.is_day,rain:j.daily && j.daily.precipitation_probability_max ? j.daily.precipitation_probability_max[0] : null,at:Date.now(),err:0}); try{ localStorage.setItem("jv.wx",JSON.stringify(WX)); }catch(e){} }catch(e){ WX.err = 1; } wxShow();
+}
+setInterval(() => { if(lastPos && Date.now()-wxTry > (WX.at && !WX.err ? 900000 : 60000)) wxFetch(); },3000);
+function wxSpeak(){ if(WX.t == null) return say(lastPos ? "I have no weather data yet, sir. I need an internet connection." : "I need a GPS fix first, sir."); const i = wxInfo(WX.code,WX.day); say("It is "+Math.round(WX.t)+" degrees and "+i.t.toLowerCase()+", sir. Humidity "+Math.round(WX.h)+" percent, wind "+Math.round(WX.w)+" kilometres per hour."+(WX.rain > 60 ? " I would suggest the wipers." : WX.t > 34 ? " Do mind the air conditioning, sir." : "")); }
+
+// ---------- Marvel archive ----------
+const MQ = [
+ {q:"I can do this all day.",w:"Steve Rogers / Captain America",p:[.85,.95]},{q:"Part of the journey is the end.",w:"Tony Stark / Iron Man · Avengers: Endgame",p:[.8,.9]},{q:"Wakanda Forever!",w:"T’Challa / Black Panther",p:[.8,.9]},
+ {q:"With great power comes great responsibility.",w:"Uncle Ben / Spider-Man",p:[.7,.85]},{q:"What is grief, if not love persevering?",w:"Vision · WandaVision",p:[.95,.85]},{q:"Excelsior!",w:"Stan Lee",p:[.9,1]},
+ {q:"I am Iron Man.",w:"Tony Stark",p:[.8,.9]},{q:"Genius, billionaire, playboy, philanthropist.",w:"Tony Stark · The Avengers",p:[.8,1]},{q:"That’s my secret, Cap. I’m always angry.",w:"Bruce Banner / Hulk",p:[.7,.95]},
+ {q:"I’ll do you one better: why is Gamora?",w:"Drax · Avengers: Infinity War",p:[.45,.8]},{q:"We are Groot.",w:"Groot",p:[.55,.6]},{q:"The hardest choices require the strongest wills.",w:"Thanos · Avengers: Infinity War",p:[.35,.75]},
+ {q:"Avengers, assemble!",w:"Captain America",p:[.85,.95]},{q:"Peace was never an option.",w:"Erik Lehnsherr / Magneto",p:[.6,.85]},{q:"I love you 3000.",w:"Morgan & Tony Stark · Avengers: Endgame",p:[1.1,.95]},
+ {q:"Whatever it takes.",w:"The Avengers · Endgame",p:[.8,.9]},{q:"I am inevitable.",w:"Thanos",p:[.35,.7]},{q:"On your left.",w:"Sam Wilson / Falcon",p:[.85,1]},{q:"Dormammu, I’ve come to bargain.",w:"Doctor Strange",p:[.7,.9]},
+ {q:"Hulk smash!",w:"Hulk",p:[.3,.85]},{q:"Language!",w:"Steve Rogers / Captain America",p:[.85,.95]},{q:"Mr. Stark, I don’t feel so good.",w:"Peter Parker / Spider-Man · Infinity War",p:[1.15,1]}];
+let mqLast = -1, lastQuote = 0;
+function marvelAt(i){ const m = MQ[i]; mqLast = i; $("qText").textContent = "“"+m.q+"”"; $("qWho").textContent = "— "+m.w; lastQuote = Date.now(); sayQ(m.q,m.p); }
+function marvel(kind){ let i; if(kind === "end") i = Math.random() < .6 ? 1 : 0; else do{ i = Math.floor(Math.random()*MQ.length); }while(i === mqLast); marvelAt(i); }
+$("qBtn").onclick = () => marvel(); $("mvBtn").onclick = () => { marvel(); go("home"); };
+setInterval(() => { if(CFG.idleQ === false || !userActed) return; const n = Date.now(); if(S.speed < 2 && au.paused && !NAV.on && n-lastAct > 120000 && n-lastQuote > 240000 && !(window.speechSynthesis && speechSynthesis.speaking)) marvel(); },20000);
+const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+function extraCmd(t){
+ if(/(weather|temperature|how (hot|cold)|is it (raining|sunny|hot|cold)|humidity|will it rain|forecast)/.test(t)){ wxSpeak(); return true; }
+ if(/i am iron man|i'?m iron man/.test(t)){ say("Indeed you are, sir."); return true; }
+ if(/avengers assemble|^assemble/.test(t)){ marvelAt(12); return true; } if(/wakanda forever/.test(t)){ marvelAt(2); return true; } if(/excelsior/.test(t)){ marvelAt(5); return true; }
+ if(/(stop|disable|turn off|no more).*(quotes|trivia)/.test(t)){ CFG.idleQ = false; $("idleSw").checked = false; save(); say("Marvel quotes disabled, sir. A shame."); return true; }
+ if(/(enable|turn on|start).*(quotes|trivia)/.test(t)){ CFG.idleQ = true; $("idleSw").checked = true; save(); say("Marvel quotes enabled, sir."); return true; }
+ if(/(marvel|avengers|trivia|surprise me|entertain me|famous quote|quote)/.test(t)){ marvel(); return true; }
+ const nt = norm(t), qi2 = MQ.findIndex(x => { const nq = norm(x.q); return nq.split(" ").length >= 3 && nt.includes(nq); }); if(qi2 >= 0){ say("That was "+MQ[qi2].w.split("·")[0].trim()+", sir. Well recalled."); return true; }
+ if(/(sync|backup|export|transfer).*(data|trips|everything|drive|backup|devices?|phone|tablet)/.test(t)){ go("set"); say("Opening the sync options, sir."); return true; }
+ if(/zoom (in|out)/.test(t)){ TZ = Math.max(-5,Math.min(3,TZ+(/in/.test(t) ? 1 : -1))); drawMap($("map1")); drawMap($("map2")); say("Check."); return true; }
+ return false;
+}
+
+// ---------- sync between devices ----------
+const CRCT = (() => { const t = []; for(let n=0;n<256;n++){ let c = n; for(let k=0;k<8;k++) c = c & 1 ? 0xEDB88320^(c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u => { let c = ~0; for(let i=0;i<u.length;i++) c = CRCT[(c^u[i])&255]^(c >>> 8); return ~c >>> 0; };
+function zipStore(files){
+ const enc = new TextEncoder(), parts = [], cd = []; let off = 0;
+ for(const f of files){
+  const nm = enc.encode(f.name), crc = crc32(f.data), h = new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(12,0x21,true); h.setUint32(14,crc,true); h.setUint32(18,f.data.length,true); h.setUint32(22,f.data.length,true); h.setUint16(26,nm.length,true);
+  parts.push(new Uint8Array(h.buffer),nm,f.data);
+  const c = new DataView(new ArrayBuffer(46)); c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(14,0x21,true); c.setUint32(16,crc,true); c.setUint32(20,f.data.length,true); c.setUint32(24,f.data.length,true); c.setUint16(28,nm.length,true); c.setUint32(42,off,true);
+  cd.push(new Uint8Array(c.buffer),nm); off += 30+nm.length+f.data.length;
+ }
+ let cdl = 0; cd.forEach(x => cdl += x.length); const e = new DataView(new ArrayBuffer(22)); e.setUint32(0,0x06054b50,true); e.setUint16(8,files.length,true); e.setUint16(10,files.length,true); e.setUint32(12,cdl,true); e.setUint32(16,off,true);
+ return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:"application/zip"});
+}
+function unzip(buf){
+ const u = new Uint8Array(buf), dv = new DataView(buf); let e = u.length-22; while(e >= 0 && dv.getUint32(e,true) !== 0x06054b50) e--; if(e < 0) throw new Error("not a JARVIS backup");
+ const n = dv.getUint16(e+10,true), dec = new TextDecoder(), out = []; let p = dv.getUint32(e+16,true);
+ for(let i=0;i<n;i++){ const method = dv.getUint16(p+10,true), csz = dv.getUint32(p+20,true), nl = dv.getUint16(p+28,true), el = dv.getUint16(p+30,true), cl = dv.getUint16(p+32,true), lo = dv.getUint32(p+42,true), name = dec.decode(u.subarray(p+46,p+46+nl));
+  if(method !== 0) throw new Error("unsupported zip"); const ds = lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true); out.push({name,data:u.subarray(ds,ds+csz)}); p += 46+nl+el+cl; }
+ return out;
+}
+function buildData(){ return {ver:1,time:Date.now(),cfg:CFG,trips:TRIPS,routes:ROUTES,fav:FAV,pl:PL.map(p => ({id:p.id,name:p.name,songs:p.ids.map(i => { const s = sById(i); return s && s.name; }).filter(Boolean)}))}; }
+function mergeData(d){
+ const mergeById = (A,B) => { const ids = new Set(A.map(x => x.id)); (B || []).forEach(x => { if(!ids.has(x.id)) A.push(x); }); A.sort((a,b) => b.id-a.id); };
+ mergeById(TRIPS,d.trips); mergeById(ROUTES,d.routes); (d.fav || []).forEach(f => { if(!FAV.some(x => x.tel === f.tel)) FAV.push(f); });
+ (d.pl || []).forEach(p => { let L = PL.find(x => x.name.toLowerCase() === p.name.toLowerCase()); if(!L){ L = {id:p.id || Date.now(),name:p.name,ids:[]}; PL.push(L); } (p.songs || []).forEach(n => { const s = SONGS.find(x => x.name === n); if(s && !L.ids.includes(s.id)) L.ids.push(s.id); }); });
+ if(d.cfg) ["prof","theme","acc","vol","auto","limit","lang","speak","eng","voice","vp","vr","idleQ","noWake"].forEach(k => { if(d.cfg[k] !== undefined) CFG[k] = d.cfg[k]; });
+ save(); saveJ(); savePL(); renderAll(); renderTrips(); renderRoutes(); renderFav(); applyTheme(); applyProfile(); setVol(CFG.vol); setEng(CFG.eng,true);
+}
+async function bkExport(){
+ try{ say("Preparing the backup, sir."); const files = [{name:"data.json",data:new TextEncoder().encode(JSON.stringify(buildData()))}];
+  if($("bkSongs").checked) for(const s of SONGS) files.push({name:"songs/"+s.name.replace(/[\/\\]/g,"_")+"."+(EXT[s.blob.type] || "mp3"),data:new Uint8Array(await s.blob.arrayBuffer())});
+  const blob = zipStore(files), f = new File([blob],"jarvis-backup-"+new Date().toISOString().slice(0,10)+".zip",{type:"application/zip"});
+  if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f],title:"JARVIS backup"}); return say("Backup ready, sir."); }catch(e){ if(e && e.name === "AbortError") return; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); say("Backup downloaded, sir.");
+ }catch(e){ say("The backup failed, sir. "+e.message); }
+}
+async function bkImport(file){
+ try{ const files = unzip(await file.arrayBuffer()), d = files.find(f => f.name === "data.json"); if(!d) throw new Error("data.json is missing"); let added = 0;
+  for(const f of files.filter(x => x.name.indexOf("songs/") === 0)){ const base = f.name.slice(6), ext = (base.match(/\.([^.]+)$/) || [])[1] || "mp3", name = base.replace(/\.[^.]+$/,""); if(SONGS.some(s => s.name === name && s.blob.size === f.data.length)) continue; await dbPut(new File([f.data],name+"."+ext,{type:MIME[ext.toLowerCase()] || "audio/mpeg"})); added++; await loadSongs(); }
+  await loadSongs(); mergeData(JSON.parse(new TextDecoder().decode(d.data))); say("Import complete, sir."+(added ? " "+added+" songs added." : ""));
+ }catch(e){ say("I could not read that backup, sir. "+e.message); }
+}
+$("bkExport").onclick = bkExport; $("bkFile").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if(f) bkImport(f); };
+let gdTok = null; $("gdId").value = localStorage.getItem("jv.gcid") || "";
+const gdScript = () => new Promise(res => { if(window.google && google.accounts) return res(true); const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.onload = () => res(true); s.onerror = () => res(false); document.head.appendChild(s); });
+async function gdAuth(){
+ const cid = $("gdId").value.trim(); if(!cid) throw new Error("enter your Google Client ID first"); try{ localStorage.setItem("jv.gcid",cid); }catch(e){}
+ if(!(await gdScript())) throw new Error("Google sign-in is blocked here. Use the installed app");
+ return new Promise((res,rej) => google.accounts.oauth2.initTokenClient({client_id:cid,scope:"https://www.googleapis.com/auth/drive.appdata",callback:r => r.access_token ? res(r.access_token) : rej(new Error(r.error || "sign-in failed"))}).requestAccessToken({prompt:gdTok ? "" : "consent"}));
+}
+async function gdApi(url,opt){ const r = await fetch(url,Object.assign({headers:{Authorization:"Bearer "+gdTok}},opt)); if(!r.ok) throw new Error("Drive error "+r.status); return r; }
+async function gdSync(){
+ const st = $("syncStat");
+ try{ st.textContent = "Signing in…"; gdTok = await gdAuth(); st.textContent = "Syncing…";
+  const L = await (await gdApi("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q="+encodeURIComponent("name='jarvis-sync.json'")+"&fields=files(id)")).json(), id = L.files && L.files[0] && L.files[0].id;
+  if(id) mergeData(await (await gdApi("https://www.googleapis.com/drive/v3/files/"+id+"?alt=media")).json()); const body = JSON.stringify(buildData());
+  if(id) await gdApi("https://www.googleapis.com/upload/drive/v3/files/"+id+"?uploadType=media",{method:"PATCH",headers:{Authorization:"Bearer "+gdTok,"Content-Type":"application/json"},body});
+  else { const bd = "jvb"+Date.now(); await gdApi("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",{method:"POST",headers:{Authorization:"Bearer "+gdTok,"Content-Type":"multipart/related; boundary="+bd},body:"--"+bd+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify({name:"jarvis-sync.json",parents:["appDataFolder"]})+"\r\n--"+bd+"\r\nContent-Type: application/json\r\n\r\n"+body+"\r\n--"+bd+"--"}); }
+  st.textContent = "Synced "+new Date().toLocaleTimeString(); say("Drive sync complete, sir.");
+ }catch(e){ st.textContent = "Sync failed: "+e.message; say("The Drive sync failed, sir."); }
+}
+$("gdBtn").onclick = gdSync;
+
+// ---------- OpenStreetMap tile map with trail, route and destination ----------
+const lon2x = (lo,z) => (lo+180)/360*Math.pow(2,z)*256, lat2y = (la,z) => { const r = la*Math.PI/180; return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*Math.pow(2,z)*256; };
+function drawMap(el){
+ if(!el || !el.querySelector) return; const tl = el.querySelector(".tl"), ov = el.querySelector("svg.ov"), msg = el.querySelector(".tmsg"); if(!tl || !ov) return;
+ const W = el.clientWidth || 300, H = el.clientHeight || 225, cc = lastPos ? [lastPos.coords.latitude,lastPos.coords.longitude] : (TR.length ? [TR[TR.length-1].la,TR[TR.length-1].lo] : null);
+ if(!cc){ ov.innerHTML = '<text x="'+W/2+'" y="'+H/2+'" text-anchor="middle" fill="var(--mut)" font-size="14">Waiting for GPS…</text>'; return; }
+ let z = S.speed > 90 ? 14 : S.speed > 55 ? 15 : S.speed > 25 ? 16 : 17; z = Math.max(8,Math.min(19,z+TZ));
+ const n = Math.pow(2,z), cx = lon2x(cc[1],z), cy = lat2y(cc[0],z), x0 = Math.floor((cx-W/2)/256), x1 = Math.floor((cx+W/2)/256), y0 = Math.floor((cy-H/2)/256), y1 = Math.floor((cy+H/2)/256), want = {};
+ for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++){
+  if(y < 0 || y >= n) continue; const xx = ((x%n)+n)%n, key = z+"/"+xx+"/"+y+"@"+x; want[key] = 1; let im = tl.querySelector('img[data-k="'+key+'"]');
+  if(!im){ im = document.createElement("img"); im.dataset.k = key; im.alt = ""; im.onload = () => { el._ok = (el._ok || 0)+1; msg.textContent = ""; }; im.onerror = () => { el._bad = (el._bad || 0)+1; if(el._bad > 2 && !el._ok) msg.textContent = "Map tiles can’t load here. Open the installed app with internet to see the map."; }; im.src = "https://tile.openstreetmap.org/"+z+"/"+xx+"/"+y+".png"; tl.appendChild(im); }
+  im.style.left = Math.round(x*256-cx+W/2)+"px"; im.style.top = Math.round(y*256-cy+H/2)+"px";
+ }
+ tl.querySelectorAll("img").forEach(im => { if(!want[im.dataset.k]) im.remove(); });
+ const P = p => [lon2x(p[1],z)-cx+W/2,lat2y(p[0],z)-cy+H/2], pl = a => a.map(q => q[0].toFixed(1)+","+q[1].toFixed(1)).join(" "), hd = TR.length ? TR[TR.length-1].hd : 0; let h = "";
+ if(TR.length > 1) h += '<polyline points="'+pl(TR.map(p => P([p.la,p.lo])))+'" fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>';
+ if(NAV.on && NAV.pts.length){ const st = Math.ceil(NAV.pts.length/1200); h += '<polyline points="'+pl(NAV.pts.filter((_,i) => i%st === 0).map(P))+'" fill="none" stroke="var(--hot)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'; }
+ if(NAV.on && NAV.dest){ if(NAV.pts.length){ const d = P(NAV.dest); h += `<g transform="translate(${d[0].toFixed(1)} ${d[1].toFixed(1)})"><circle r="9" fill="var(--hot)"/><text y="4" text-anchor="middle" font-size="11" fill="#fff">⚑</text></g>`; } else { const b = BR(cc,NAV.dest)*Math.PI/180; h += `<line x1="${W/2}" y1="${H/2}" x2="${(W/2+Math.sin(b)*H*.4).toFixed(1)}" y2="${(H/2-Math.cos(b)*H*.4).toFixed(1)}" stroke="var(--hot)" stroke-width="3" stroke-dasharray="6 5"/>`; } }
+ h += `<g transform="translate(${W/2} ${H/2}) rotate(${hd})"><circle r="16" fill="var(--acc)" opacity=".25"/><path d="M0-12L8 9L0 5L-8 9Z" fill="var(--acc)" stroke="#fff" stroke-width="1.5"/></g>`; ov.innerHTML = h;
+}
+document.addEventListener("click",e => { const b = e.target.closest && e.target.closest(".zm"); if(!b) return; TZ = Math.max(-5,Math.min(3,TZ+ +b.dataset.z)); drawMap($("map1")); drawMap($("map2")); });
+
+// ---------- dynamic HUD: telemetry graphs, diagnostics bars, compass, hex badges, clocks ----------
+(function(){ let h = ""; for(let a=0;a<360;a+=10){ const maj = a%30 === 0, r2 = maj ? 274 : 269, rad = a*Math.PI/180; h += `<line x1="${(250+262*Math.sin(rad)).toFixed(1)}" y1="${(250-262*Math.cos(rad)).toFixed(1)}" x2="${(250+r2*Math.sin(rad)).toFixed(1)}" y2="${(250-r2*Math.cos(rad)).toFixed(1)}" stroke="var(--acc)" stroke-width="${maj ? 2 : 1}" opacity="${maj ? 1 : .6}"/>`; }
+ [["N",0],["E",90],["S",180],["W",270]].forEach(([l,a]) => { const rad = a*Math.PI/180, x = (250+286*Math.sin(rad)).toFixed(1), y = (250-286*Math.cos(rad)).toFixed(1); h += `<text x="${x}" y="${(+y+5).toFixed(1)}" style="font-size:15px;font-weight:700;fill:${l === "N" ? "var(--hot)" : "var(--acc)"}" transform="rotate(${a} ${x} ${y})">${l}</text>`; }); $("cmpT").innerHTML = h; })();
+function dtl(){ const d = new Date(), n = new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); let h = ""; for(let i=1;i<=n;i++) h += `<i class="${i === d.getDate() ? "on" : ""}">${String(i).padStart(2,"0")}</i>`; $("dtl").innerHTML = h; } dtl(); setInterval(dtl,60000);
+const CITIES = [["Delhi","Asia/Kolkata"],["Dubai","Asia/Dubai"],["London","Europe/London"],["New York","America/New_York"],["Tokyo","Asia/Tokyo"],["Sydney","Australia/Sydney"]];
+function wcTick(){ $("wc").innerHTML = CITIES.map(([n,z]) => { let t = "--:--"; try{ t = new Date().toLocaleTimeString("en-GB",{timeZone:z,hour:"2-digit",minute:"2-digit"}); }catch(e){} return `<tr><td>${n}</td><td>${t}</td></tr>`; }).join(""); } wcTick(); setInterval(wcTick,15000);
+let BAT = null; try{ if(navigator.getBattery) navigator.getBattery().then(b => { BAT = b; }); }catch(e){}
+const HIST = [[],[],[],[]], HN = 80;
+function gdraw(c,arr,min,max,col){
+ const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight; if(!w) return; if(c.width !== Math.round(w*dpr)){ c.width = Math.round(w*dpr); c.height = Math.round(h*dpr); }
+ const x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,w,h); x.strokeStyle = "rgba(127,160,200,.2)"; x.lineWidth = 1; for(let i=1;i<4;i++){ x.beginPath(); x.moveTo(0,h*i/4); x.lineTo(w,h*i/4); x.stroke(); }
+ if(arr.length < 2) return; const sx = w/(HN-1), Y = v => h-2-(Math.max(min,Math.min(max,v))-min)/(max-min)*(h-4), g = x.createLinearGradient(0,0,0,h); g.addColorStop(0,col); g.addColorStop(1,"rgba(0,0,0,0)");
+ x.beginPath(); arr.forEach((v,i) => { const px = (HN-arr.length+i)*sx; i ? x.lineTo(px,Y(v)) : x.moveTo(px,Y(v)); }); x.strokeStyle = col; x.lineWidth = 1.6; x.shadowColor = col; x.shadowBlur = 6; x.stroke(); x.shadowBlur = 0;
+ x.lineTo(w,h); x.lineTo((HN-arr.length)*sx,h); x.closePath(); x.globalAlpha = .28; x.fillStyle = g; x.fill(); x.globalAlpha = 1;
+}
+let cAng = 0, cPrev = 0;
+setInterval(() => {
+ if(!$("home").classList.contains("on")) return; const cs = getComputedStyle(document.documentElement), acc = cs.getPropertyValue("--acc").trim() || "#2f9bff", hot = cs.getPropertyValue("--hot").trim() || "#ff2a3a";
+ [S.speed,S.rpm,S.throttle*100,S.acc].forEach((v,i) => { HIST[i].push(v); if(HIST[i].length > HN) HIST[i].shift(); });
+ gdraw($("cv0"),HIST[0],0,160,acc); gdraw($("cv1"),HIST[1],0,6500,hot); gdraw($("cv2"),HIST[2],0,100,acc); gdraw($("cv3"),HIST[3],-5,5,hot);
+ $("gSp").textContent = Math.round(S.speed)+" km/h"; $("gRp").textContent = Math.round(S.rpm/10)*10; $("gTh").textContent = Math.round(S.throttle*100)+"%"; $("gAc").textContent = S.acc.toFixed(1)+" m/s²";
+ const fresh = S.lastFix && Date.now()-S.lastFix < 8000, gp = fresh ? Math.max(5,100-Math.round((lastPos ? lastPos.coords.accuracy : 50)*2)) : 0, bat = BAT ? Math.round(BAT.level*100) : null;
+ const B = (id,p,t) => { $(id).style.width = Math.max(0,Math.min(100,p))+"%"; $(id+"V").textContent = t; };
+ B("bRpm",S.rpm/65,Math.round(S.rpm/65)+"%"); B("bThr",S.throttle*100,Math.round(S.throttle*100)+"%"); B("bSpd",S.speed/1.6,Math.round(S.speed/1.6)+"%"); B("bFuel",S.flow*5,S.flow.toFixed(1)+"L"); B("bGps",gp,gp+"%"); B("bObd",S.obdOn ? 100 : 0,S.obdOn ? "ON" : "OFF"); B("bBat",bat == null ? 0 : bat,bat == null ? "–" : bat+"%");
+ const hd = TR.length ? TR[TR.length-1].hd : 0; cAng += ((hd-cPrev+540)%360)-180; cPrev = hd; $("cmp").style.transform = "rotate("+(-cAng)+"deg)"; $("rpmN").textContent = Math.round(D.r/10)*10;
+ $("hxGps").classList.toggle("on",!!fresh); $("hxObd").classList.toggle("on",S.obdOn); $("hxVoice").classList.toggle("on",hands); $("hxFx").classList.toggle("on",CFG.eng && started); $("hxNav").classList.toggle("on",NAV.on);
+},120);
+
+// ---------- start-up ----------
+fillVoices(); wxShow(); applyTheme(); drawMap($("map1"));
+</script>
+</body>
+</html>
